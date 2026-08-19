@@ -29,6 +29,7 @@ spring:
       mail.smtp.starttls.enable: ${SMTP_STARTTLS:false}
 
 server:
+  port: ${PORT:8080}
   forward-headers-strategy: framework
 
 management:

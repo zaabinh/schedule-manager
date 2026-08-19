@@ -22,6 +22,11 @@ for (const [name, value] of [["STAGING_WEB_ORIGIN", webOrigin], ["STAGING_API_OR
   }
 }
 if (webOrigin === apiOrigin) throw new Error("Staging web and API origins must be distinct");
+const webParent = new URL(webOrigin).hostname.split(".").slice(1).join(".");
+const apiParent = new URL(apiOrigin).hostname.split(".").slice(1).join(".");
+if (!webParent || webParent !== apiParent) {
+  throw new Error("Staging web and API must use sibling custom domains so SameSite session cookies work");
+}
 
 const failures = [];
 function requireCheck(condition, message) {

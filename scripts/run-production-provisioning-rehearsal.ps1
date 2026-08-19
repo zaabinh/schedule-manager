@@ -50,6 +50,10 @@ try {
 
     $provisionArguments = @(
         "run", "--rm", "--no-deps",
+        "-e", "DB_URL=",
+        "-e", "DB_USER=",
+        "-e", "DB_PASSWORD=",
+        "-e", "DATABASE_URL=postgresql://schedule_app:fixture-db-password-32-characters-long@postgres:5432/schedule_manager",
         "-e", "APP_PROVISIONING_MODE=true",
         "-e", "BOOTSTRAP_ADMIN_ENABLED=true",
         "-e", "BOOTSTRAP_ADMIN_EMAIL",

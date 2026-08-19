@@ -4,6 +4,7 @@ target/
 backend/target/
 .env
 .env.local
+.env.production
 .env.*
 !.env.example
 !.env.production.example

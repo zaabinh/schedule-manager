@@ -257,7 +257,13 @@ docs/                        Requirements, design, plans và phase reports
 compose.yaml                 PostgreSQL local
 ```
 
-Tài liệu tiến độ gần nhất: [Phase 12 Report](docs/phase-reports/phase-12.md). Xem thêm [Production Readiness Report](docs/production-readiness-report.md), [Project Roadmap](docs/project-roadmap.md) và [Production Deployment Runbook](docs/runbooks/production-deployment.md).
+Tài liệu tiến độ gần nhất: [Phase 13 Report](docs/phase-reports/phase-13.md). Xem thêm [Production Readiness Report](docs/production-readiness-report.md), [Project Roadmap](docs/project-roadmap.md) và [Production Deployment Runbook](docs/runbooks/production-deployment.md).
+
+## Triển khai Render + Vercel
+
+Topology cloud đã chọn là Vercel cho frontend và Render cho API/PostgreSQL. Quy trình từ dashboard, custom domain, DNS, secret và phân chia việc người vận hành/Codex nằm trong [Render + Vercel Deployment Runbook](docs/runbooks/render-vercel-deployment.md). `render.yaml` là Blueprint của Render; Vercel deploy Next.js từ root repository với `NEXT_PUBLIC_API_BASE_URL` trỏ đến custom API domain.
+
+Hai dịch vụ phải dùng sibling custom domains, ví dụ `app.school.edu.vn` và `api.school.edu.vn`, để cookie đăng nhập `SameSite=Lax` hoạt động đúng. Không đưa production secret vào repository hoặc chat.
 
 ## Production build và triển khai
 

@@ -5,7 +5,7 @@ Chạy các gate này trên staging HTTPS có topology, dữ liệu và integrat
 ## 1. Public endpoint và authenticated session smoke
 
 ```powershell
-$env:STAGING_WEB_ORIGIN="https://schedule-staging.example.edu.vn"
+$env:STAGING_WEB_ORIGIN="https://app.schedule-staging.example.edu.vn"
 $env:STAGING_API_ORIGIN="https://api.schedule-staging.example.edu.vn"
 $env:STAGING_ADMIN_EMAIL="release-admin@example.edu.vn"
 $env:STAGING_ADMIN_PASSWORD="<read-from-secret-manager>"

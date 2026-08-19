@@ -58,6 +58,19 @@ for (const key of ["PUBLIC_WEB_ORIGIN", "PUBLIC_API_ORIGIN"]) {
 if (values.get("PUBLIC_WEB_ORIGIN") === values.get("PUBLIC_API_ORIGIN")) {
   errors.push("PUBLIC_WEB_ORIGIN and PUBLIC_API_ORIGIN must be distinct origins");
 }
+if (values.has("PUBLIC_WEB_ORIGIN") && values.has("PUBLIC_API_ORIGIN")) {
+  try {
+    const webHostParts = new URL(values.get("PUBLIC_WEB_ORIGIN")).hostname.split(".");
+    const apiHostParts = new URL(values.get("PUBLIC_API_ORIGIN")).hostname.split(".");
+    const webParent = webHostParts.length >= 3 ? webHostParts.slice(1).join(".") : "";
+    const apiParent = apiHostParts.length >= 3 ? apiHostParts.slice(1).join(".") : "";
+    if (!webParent || webParent !== apiParent) {
+      errors.push("PUBLIC_WEB_ORIGIN and PUBLIC_API_ORIGIN must use sibling custom domains for SameSite session cookies");
+    }
+  } catch {
+    // The origin validation above already reports malformed URLs.
+  }
+}
 if (values.has("SESSION_COOKIE_NAME") && !/^__Host-.+/u.test(values.get("SESSION_COOKIE_NAME"))) {
   errors.push("SESSION_COOKIE_NAME must use the __Host- prefix");
 }
@@ -86,4 +99,4 @@ if (!skipCompose) {
 }
 
 console.log("Production configuration preflight PASS.");
-console.log(`Validated required values, placeholders, secret lengths, __Host- cookie, HTTPS origins, email and SMTP port${skipCompose ? "." : " plus Compose interpolation."}`);
+console.log(`Validated required values, placeholders, secret lengths, __Host- cookie, sibling HTTPS origins, email and SMTP port${skipCompose ? "." : " plus Compose interpolation."}`);

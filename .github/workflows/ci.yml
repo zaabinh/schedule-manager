@@ -35,6 +35,12 @@ jobs:
             echo "Expected placeholder production configuration to be rejected"
             exit 1
           fi
+      - name: Reject cross-site deployment origins
+        run: |
+          if npm run release:validate-config -- --env-file tests/config/production-config.cross-site.env --skip-compose; then
+            echo "Expected unrelated Vercel and Render domains to be rejected"
+            exit 1
+          fi
 
   browser-e2e:
     runs-on: ubuntu-latest

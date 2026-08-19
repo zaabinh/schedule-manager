@@ -16,6 +16,16 @@ flowchart LR
 
 Cookie cùng-site dễ nhất khi dùng `app.school.edu.vn` và `api.school.edu.vn`; CORS/CSRF vẫn cấu hình explicit. Region và data residency là **OPEN QUESTION**.
 
+### Topology đã chọn cho Phase 13
+
+- Frontend: Vercel, production branch `main`.
+- Backend: Render Docker web service từ `backend/Dockerfile`.
+- Database: Render PostgreSQL managed cùng region Singapore với backend.
+- IaC: `render.yaml`; hướng dẫn thao tác tại `docs/runbooks/render-vercel-deployment.md`.
+- Public origins: sibling custom domains như `app.school.edu.vn` và `api.school.edu.vn`. Domain mặc định khác site của Vercel/Render không dùng cho authenticated acceptance test vì session cookie là `SameSite=Lax`.
+
+Blueprint cố định một backend instance ở giai đoạn MVP để scheduler dễ vận hành, cấu hình readiness endpoint và one-shot initial Admin hook. Người có quyền tài khoản vẫn phải duyệt plan/chi phí, nhập secret và cấu hình DNS trong dashboard.
+
 ## 2. Environments
 
 | Env | Mục đích | Data/đặc điểm |

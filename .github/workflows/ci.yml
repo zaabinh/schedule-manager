@@ -79,10 +79,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: docker compose --project-name schedule-manager-ci-security --file compose.e2e.yaml up --detach --build --wait postgres-e2e backend-e2e frontend-e2e
+      - name: Prepare ZAP working directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/zap-work"
+          cp tests/security/zap-baseline.conf "$RUNNER_TEMP/zap-work/zap-baseline.conf"
+          chmod 0777 "$RUNNER_TEMP/zap-work"
       - run: >-
           docker run --rm --network schedule-manager-ci-security_default
-          --volume "$PWD/tests/security:/zap/config:ro"
+          --volume "$RUNNER_TEMP/zap-work:/zap/wrk:rw"
           ghcr.io/zaproxy/zaproxy@sha256:781a2bdaea47324e7bab583e2263f21d257b0aee61ed51521a5be45f5f5081ef
-          zap-baseline.py -t http://frontend-e2e:3000 -m 1 -T 3 -s -I -c /zap/config/zap-baseline.conf
+          zap-baseline.py -t http://frontend-e2e:3000 -m 1 -T 3 -s -I -c /zap/wrk/zap-baseline.conf
       - if: always()
         run: docker compose --project-name schedule-manager-ci-security --file compose.e2e.yaml down --volumes --remove-orphans

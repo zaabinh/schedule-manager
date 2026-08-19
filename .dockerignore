@@ -1,0 +1,9 @@
+.git
+.github
+.next
+backend/target
+node_modules
+backups
+docs
+*.log
+.env*

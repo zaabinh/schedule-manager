@@ -75,6 +75,7 @@ app:
     session-pepper: ${SESSION_PEPPER:local-development-pepper-change-me}
   bootstrap-admin:
     enabled: ${BOOTSTRAP_ADMIN_ENABLED:false}
+    provisioning-mode: ${APP_PROVISIONING_MODE:false}
     email: ${BOOTSTRAP_ADMIN_EMAIL:}
     password: ${BOOTSTRAP_ADMIN_PASSWORD:}
     display-name: ${BOOTSTRAP_ADMIN_DISPLAY_NAME:Quản trị hệ thống}

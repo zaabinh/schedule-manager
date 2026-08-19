@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 @ConditionalOnProperty(name = "app.bootstrap-admin.enabled", havingValue = "true")
@@ -18,12 +20,17 @@ public class AdminBootstrapper implements ApplicationRunner {
     private final JdbcTemplate jdbc;
     private final PasswordEncoder passwords;
     private final PasswordPolicy policy;
+    private final TransactionTemplate transactions;
+    private final ConfigurableApplicationContext applicationContext;
+    private final boolean provisioningMode;
     private final String email;
     private final String password;
     private final String displayName;
     private final String departmentName;
 
     public AdminBootstrapper(JdbcTemplate jdbc, PasswordEncoder passwords, PasswordPolicy policy,
+            PlatformTransactionManager transactionManager, ConfigurableApplicationContext applicationContext,
+            @Value("${app.bootstrap-admin.provisioning-mode:false}") boolean provisioningMode,
             @Value("${app.bootstrap-admin.email:}") String email,
             @Value("${app.bootstrap-admin.password:}") String password,
             @Value("${app.bootstrap-admin.display-name:Quản trị hệ thống}") String displayName,
@@ -31,6 +38,9 @@ public class AdminBootstrapper implements ApplicationRunner {
         this.jdbc = jdbc;
         this.passwords = passwords;
         this.policy = policy;
+        this.transactions = new TransactionTemplate(transactionManager);
+        this.applicationContext = applicationContext;
+        this.provisioningMode = provisioningMode;
         this.email = email;
         this.password = password;
         this.displayName = displayName;
@@ -38,8 +48,12 @@ public class AdminBootstrapper implements ApplicationRunner {
     }
 
     @Override
-    @Transactional
     public void run(ApplicationArguments args) {
+        transactions.executeWithoutResult(ignored -> bootstrap());
+        if (provisioningMode) applicationContext.close();
+    }
+
+    private void bootstrap() {
         Integer admins = jdbc.queryForObject("SELECT count(*) FROM users WHERE system_role='ADMIN' AND status='ACTIVE'", Integer.class);
         if (admins != null && admins > 0) return;
         if (email.isBlank() || password.isBlank()) throw new IllegalStateException("Bootstrap Admin credentials are required");

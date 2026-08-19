@@ -36,6 +36,7 @@ services:
       SESSION_COOKIE_SECURE: "true"
       SESSION_PEPPER: ${SESSION_PEPPER:?required}
       BOOTSTRAP_ADMIN_ENABLED: "false"
+      APP_PROVISIONING_MODE: "false"
       SCHOOL_TIME_ZONE: ${SCHOOL_TIME_ZONE:-Asia/Ho_Chi_Minh}
       EMAIL_PROVIDER: smtp
       EMAIL_FROM: ${EMAIL_FROM:?required}

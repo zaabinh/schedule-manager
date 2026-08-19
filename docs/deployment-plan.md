@@ -47,18 +47,17 @@ Environment variables (secret đánh dấu `*`):
 
 | Variable | Ý nghĩa |
 |---|---|
-| `APP_ENV`, `APP_BASE_URL`, `API_BASE_URL` | environment/canonical URLs |
-| `SCHOOL_TIME_ZONE` | `Asia/Ho_Chi_Minh` default |
-| `DATABASE_URL*`, `DB_USER*`, `DB_PASSWORD*` | runtime DB; migration credential riêng |
-| `SESSION_PEPPER*`, `CSRF_SECRET*` | crypto secrets |
-| `SESSION_IDLE_TIMEOUT`, `SESSION_ABSOLUTE_TIMEOUT` | session policy |
-| `SESSION_COOKIE_NAME`, `SESSION_COOKIE_SECURE` | local `session/false`; production `__Host-session/true` |
-| `CORS_ALLOWED_ORIGINS` | exact origins |
-| `BOOTSTRAP_ADMIN_ENABLED`, `BOOTSTRAP_ADMIN_EMAIL*`, `BOOTSTRAP_ADMIN_PASSWORD*`, `BOOTSTRAP_ADMIN_DISPLAY_NAME`, `BOOTSTRAP_ADMIN_DEPARTMENT_NAME` | tạo Admin một lần; tắt ngay sau thành công |
-| `EMAIL_PROVIDER`, `EMAIL_API_KEY*`, `EMAIL_FROM` | email |
-| `REMINDER_POLL_INTERVAL`, `EMAIL_MAX_ATTEMPTS` | worker |
-| `SATURDAY_CRON_MORNING`, `SATURDAY_CRON_AFTERNOON` | 08:00/17:00; timezone riêng |
-| `LOG_LEVEL`, `OTEL_EXPORTER_ENDPOINT*` | observability |
+| `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD*` | database và runtime credential dùng bởi production Compose |
+| `PUBLIC_WEB_ORIGIN`, `PUBLIC_API_ORIGIN` | hai HTTPS origin chính xác, không có path/trailing slash |
+| `SESSION_PEPPER*` | secret hash session/CSRF, tối thiểu 32 ký tự ngẫu nhiên |
+| `SESSION_COOKIE_NAME` | production bắt buộc dùng prefix `__Host-`; secure cookie được Compose khóa `true` |
+| `DB_POOL_MAX_SIZE`, `DB_POOL_MIN_IDLE`, `DB_CONNECTION_TIMEOUT_MS` | Hikari pool và fail-fast timeout |
+| `AUTH_RATE_LIMIT_PER_MINUTE`, `AUTH_RATE_LIMIT_PER_HOUR` | baseline limiter đăng nhập/đăng ký |
+| `SCHOOL_TIME_ZONE` | mặc định `Asia/Ho_Chi_Minh` |
+| `EMAIL_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD*` | SMTP production; auth/STARTTLS được Compose khóa `true` |
+| `FRONTEND_PORT`, `BACKEND_PORT` | loopback port tùy chọn cho reverse proxy TLS |
+
+Credential bootstrap Admin không nằm trong `.env.production`. Chúng chỉ được inject từ secret manager vào one-shot provisioning container bằng `BOOTSTRAP_ADMIN_*`; `APP_PROVISIONING_MODE=true` và `BOOTSTRAP_ADMIN_ENABLED=true` phải xuất hiện cùng nhau. Startup production thông thường khóa cả hai về `false`.
 
 Secret lưu trong platform secret store, rotate có runbook; không in trong build logs hoặc client bundle.
 
@@ -134,4 +133,4 @@ Application rollback: chuyển traffic/redeploy digest trước. Nếu migration
 
 ## 12. Local baseline (2026-08-19)
 
-Sao chép `.env.example` thành `.env` và thay secret khi dùng ngoài máy cá nhân. `docker compose up -d postgres` chạy PostgreSQL 18 tại `localhost:5433`; backend đọc `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` và tự chạy Flyway. Port 5433 tránh xung đột PostgreSQL cài trực tiếp tại 5432. Không dùng credential mẫu trong staging/production.
+Sao chép `.env.example` thành `.env` và thay secret khi dùng ngoài máy cá nhân. `docker compose up -d postgres` chạy PostgreSQL 18 tại `localhost:5433`; backend đọc `DB_URL`, `DB_USER`, `DB_PASSWORD` và tự chạy Flyway. Port 5433 tránh xung đột PostgreSQL cài trực tiếp tại 5432. Không dùng credential mẫu trong staging/production.

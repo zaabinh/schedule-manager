@@ -1,6 +1,6 @@
 # School Weekly Plan Manager
 
-Ứng dụng quản lý kế hoạch tuần cho trường THPT. Repository hiện gồm frontend Next.js và backend Spring Boot modular monolith, sử dụng PostgreSQL/Flyway. Phase 1–4 đã tích hợp xác thực, tổ chức/lớp học, lịch năm học và WeeklyPlan DRAFT/copy/editor.
+Ứng dụng quản lý kế hoạch tuần cho trường THPT. Repository gồm frontend Next.js và backend Spring Boot modular monolith, sử dụng PostgreSQL/Flyway. Phase 0–12 đã hoàn thành toàn bộ MVP và hardening ở mức repository; release candidate hiện sẵn sàng triển khai staging để hoàn tất các gate môi trường thật trước production.
 
 ## Công nghệ
 
@@ -257,7 +257,7 @@ docs/                        Requirements, design, plans và phase reports
 compose.yaml                 PostgreSQL local
 ```
 
-Tài liệu tiến độ gần nhất: [Phase 11 Report](docs/phase-reports/phase-11.md). Kế hoạch triển khai: [Actual Implementation Plan](docs/implementation-plan.md).
+Tài liệu tiến độ gần nhất: [Phase 12 Report](docs/phase-reports/phase-12.md). Xem thêm [Production Readiness Report](docs/production-readiness-report.md), [Project Roadmap](docs/project-roadmap.md) và [Production Deployment Runbook](docs/runbooks/production-deployment.md).
 
 ## Production build và triển khai
 

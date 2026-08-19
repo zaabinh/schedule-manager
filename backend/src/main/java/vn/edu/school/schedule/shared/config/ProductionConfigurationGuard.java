@@ -14,6 +14,7 @@ public class ProductionConfigurationGuard implements SmartInitializingSingleton 
     private final String pepper;
     private final String origins;
     private final boolean bootstrapAdmin;
+    private final boolean provisioningMode;
     private final String emailProvider;
     private final String databasePassword;
 
@@ -22,6 +23,7 @@ public class ProductionConfigurationGuard implements SmartInitializingSingleton 
             @Value("${app.security.session-pepper}") String pepper,
             @Value("${app.security.allowed-origins}") String origins,
             @Value("${app.bootstrap-admin.enabled}") boolean bootstrapAdmin,
+            @Value("${app.bootstrap-admin.provisioning-mode}") boolean provisioningMode,
             @Value("${app.email.provider}") String emailProvider,
             @Value("${spring.datasource.password}") String databasePassword) {
         this.secureCookie = secureCookie;
@@ -29,6 +31,7 @@ public class ProductionConfigurationGuard implements SmartInitializingSingleton 
         this.pepper = pepper;
         this.origins = origins;
         this.bootstrapAdmin = bootstrapAdmin;
+        this.provisioningMode = provisioningMode;
         this.emailProvider = emailProvider;
         this.databasePassword = databasePassword;
     }
@@ -42,7 +45,9 @@ public class ProductionConfigurationGuard implements SmartInitializingSingleton 
                 "SESSION_PEPPER is unsafe");
         require(Arrays.stream(origins.split(",")).map(String::trim).allMatch(origin -> origin.startsWith("https://")),
                 "CORS origins must use HTTPS in prod");
-        require(!bootstrapAdmin, "BOOTSTRAP_ADMIN_ENABLED must be false after provisioning");
+        require(bootstrapAdmin == provisioningMode,
+                "BOOTSTRAP_ADMIN_ENABLED and APP_PROVISIONING_MODE must both be false for normal startup "
+                        + "or both true for one-shot provisioning");
         require("smtp".equals(emailProvider), "EMAIL_PROVIDER must be smtp in prod");
         require(!"schedule_local_password".equals(databasePassword) && databasePassword.length() >= 16,
                 "DB_PASSWORD is unsafe");

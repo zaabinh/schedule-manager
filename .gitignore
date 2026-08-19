@@ -1,0 +1,13 @@
+.next/
+node_modules/
+target/
+backend/target/
+.env
+.env.local
+*.log
+*.tsbuildinfo
+backups/
+test-results/
+playwright-report/
+.idea/
+.vscode/

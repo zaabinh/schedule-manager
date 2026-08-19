@@ -1,0 +1,6 @@
+import { AlertCircle, Inbox } from "lucide-react";
+import { Button } from "./button";
+
+export function LoadingSkeleton({ rows = 3 }: { rows?: number }) { return <div aria-label="Đang tải" className="space-y-3">{Array.from({ length: rows }, (_, i) => <div key={i} className="h-24 animate-pulse rounded-xl border bg-slate-100" />)}</div>; }
+export function EmptyState({ title, description, action }: { title: string; description: string; action?: React.ReactNode }) { return <div className="card flex flex-col items-center px-6 py-12 text-center"><span className="mb-4 rounded-full bg-slate-100 p-3 text-slate-500"><Inbox /></span><h3 className="font-bold">{title}</h3><p className="mt-1 max-w-md text-sm text-slate-500">{description}</p>{action && <div className="mt-5">{action}</div>}</div>; }
+export function ErrorState({ retry }: { retry?: () => void }) { return <div role="alert" className="card flex flex-col items-center px-6 py-10 text-center"><AlertCircle className="mb-3 text-red-600"/><h3 className="font-bold">Không thể tải dữ liệu</h3><p className="mt-1 text-sm text-slate-500">Vui lòng thử lại. Nếu lỗi tiếp diễn, hãy liên hệ quản trị viên.</p>{retry && <Button className="mt-4" onClick={retry}>Thử lại</Button>}</div>; }

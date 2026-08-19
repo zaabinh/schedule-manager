@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: schedule_manager
+      POSTGRES_USER: schedule_app
+      POSTGRES_PASSWORD: schedule_local_password
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U schedule_app -d schedule_manager"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      # PostgreSQL 18+ stores clusters below a major-version directory.
+      # Mount the parent so future pg_upgrade --link can stay on one volume.
+      - schedule-postgres-data:/var/lib/postgresql
+
+volumes:
+  schedule-postgres-data:

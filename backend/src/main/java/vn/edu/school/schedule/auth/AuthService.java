@@ -74,9 +74,14 @@ public class AuthService implements SessionAuthenticator {
                 rs.getString("status"), rs.getString("system_role")), email);
         LoginRow row = rows.isEmpty() ? null : rows.getFirst();
         boolean passwordValid = passwords.matches(request.password(), row == null ? dummyHash : row.passwordHash());
-        if (row == null || !passwordValid || !"ACTIVE".equals(row.status())) {
+        if (row == null || !passwordValid) {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Email hoặc mật khẩu không đúng.");
         }
+
+        if(!"ACTIVE".equals(row.status())) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Tài khoản chưa được Admin xác thực, vui lòng liên hệ tới ban quản trị.");
+        }
+
         String sessionToken = secrets.randomToken();
         String csrfToken = secrets.randomToken();
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);

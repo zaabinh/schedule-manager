@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1").origin;
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1";
+const apiOrigin = apiBaseUrl.startsWith("http://") || apiBaseUrl.startsWith("https://")
+  ? new URL(apiBaseUrl).origin
+  : undefined;
 
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
@@ -11,7 +14,7 @@ export function proxy(request: NextRequest) {
     `style-src 'self'${isDevelopment ? " 'unsafe-inline'" : ` 'nonce-${nonce}'`}`,
     "img-src 'self' blob: data:",
     "font-src 'self'",
-    `connect-src 'self' ${apiOrigin}`,
+    `connect-src 'self'${apiOrigin ? ` ${apiOrigin}` : ""}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

@@ -206,6 +206,7 @@ backend/target/schedule-manager-backend-0.1.0-SNAPSHOT.jar
 | Variable | Mặc định local | Mục đích |
 |---|---|---|
 | `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:8080/api/v1` | Base URL frontend gọi backend |
+| `BACKEND_ORIGIN` | trống | Origin Render dùng bởi Vercel same-origin rewrite khi `NEXT_PUBLIC_API_BASE_URL=/api/v1` |
 | `DB_URL` | `jdbc:postgresql://localhost:5433/schedule_manager` | JDBC URL |
 | `DB_USER` | `schedule_app` | Database user |
 | `DB_PASSWORD` | `schedule_local_password` | Database password local |
@@ -263,7 +264,7 @@ Tài liệu tiến độ gần nhất: [Phase 13 Report](docs/phase-reports/phas
 
 Topology cloud đã chọn là Vercel cho frontend và Render cho API/PostgreSQL. Quy trình từ dashboard, custom domain, DNS, secret và phân chia việc người vận hành/Codex nằm trong [Render + Vercel Deployment Runbook](docs/runbooks/render-vercel-deployment.md). `render.yaml` là Blueprint của Render; Vercel deploy Next.js từ root repository với `NEXT_PUBLIC_API_BASE_URL` trỏ đến custom API domain.
 
-Hai dịch vụ phải dùng sibling custom domains, ví dụ `app.school.edu.vn` và `api.school.edu.vn`, để cookie đăng nhập `SameSite=Lax` hoạt động đúng. Không đưa production secret vào repository hoặc chat.
+Ưu tiên sibling custom domains như `app.school.edu.vn` và `api.school.edu.vn`. Nếu dùng domain mặc định Vercel/Render, cấu hình same-origin proxy bằng `NEXT_PUBLIC_API_BASE_URL=/api/v1` và `BACKEND_ORIGIN=https://<service>.onrender.com` theo runbook để cookie `SameSite=Lax` hoạt động đúng. Không đưa production secret vào repository hoặc chat.
 
 ## Production build và triển khai
 

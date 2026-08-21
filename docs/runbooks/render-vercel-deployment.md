@@ -9,7 +9,7 @@ Mục tiêu là chạy frontend Next.js trên Vercel, API Spring Boot và Postgr
 - Có SMTP provider, sender đã xác minh và credential dùng STARTTLS cổng 587.
 - Đồng ý chi phí hiển thị trong dashboard trước khi tạo tài nguyên. Blueprint đề xuất Render web plan `starter`, PostgreSQL `basic-256mb`, region Singapore; hãy kiểm tra giá hiện hành ngay trên Render trước khi xác nhận.
 
-Không dùng cặp domain mặc định `*.vercel.app` và `*.onrender.com` cho đăng nhập/UAT. Chúng khác site, trong khi session hiện dùng cookie `SameSite=Lax`. Hai URL mặc định chỉ dùng để kiểm tra deploy/health trước khi gắn custom domain.
+Ưu tiên sibling custom domains cho production. Nếu dùng cặp domain mặc định `*.vercel.app` và `*.onrender.com`, bắt buộc bật same-origin API proxy theo mục Vercel bên dưới; gọi Render trực tiếp từ browser sẽ không mang cookie `SameSite=Lax` trong `/auth/me`.
 
 ## 2. Phần bạn thực hiện
 
@@ -38,11 +38,20 @@ Không dùng cặp domain mặc định `*.vercel.app` và `*.onrender.com` cho 
 ### Vercel
 
 1. Import cùng repository GitHub vào Vercel; chọn branch production `main`, framework Next.js và Root Directory là `.`.
-2. Thêm Production Environment Variable:
+2. Nếu đang dùng custom sibling domains, thêm Production Environment Variable:
 
 ```text
 NEXT_PUBLIC_API_BASE_URL=https://api.<domain-cua-ban>/api/v1
 ```
+
+Nếu chưa có custom domain và đang dùng `*.vercel.app` + `*.onrender.com`, cấu hình proxy cùng-origin để cookie không bị chặn:
+
+```text
+NEXT_PUBLIC_API_BASE_URL=/api/v1
+BACKEND_ORIGIN=https://<render-service>.onrender.com
+```
+
+Trong cả hai trường hợp, `CORS_ALLOWED_ORIGINS` trên Render phải bằng chính xác origin production của frontend Vercel, ví dụ `https://<vercel-project>.vercel.app` (không có path hoặc dấu `/` cuối). Khi dùng proxy, browser chỉ gọi Vercel và rewrite chuyển tiếp `/api/v1/*` sang Render, nên session cookie trở thành first-party.
 
 3. Deploy, sau đó thêm custom domain `app.<domain-cua-ban>` và cấu hình DNS theo hướng dẫn Vercel.
 4. Sau khi biến môi trường hoặc domain thay đổi, redeploy frontend để giá trị public được đóng vào build.

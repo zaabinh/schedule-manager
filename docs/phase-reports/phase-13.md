@@ -8,7 +8,7 @@ Trạng thái: **IN PROGRESS — RENDER/VERCEL REPOSITORY PREPARATION PASS, EXTE
 - Chốt topology Vercel frontend + Render Docker API + Render managed PostgreSQL, region Singapore.
 - Thêm `render.yaml` với paid baseline `starter`/`basic-256mb`, readiness probe, generated session pepper, SMTP/CORS secrets và one-shot initial Admin provisioning.
 - Backend hỗ trợ Render `DATABASE_URL`, biến `PORT` và vẫn ưu tiên cấu hình JDBC explicit ở môi trường hiện có.
-- Production/staging validators từ chối cặp origin khác site; authenticated deployment bắt buộc sibling custom domains như `app.school.edu.vn` và `api.school.edu.vn`.
+- Production/staging validators ưu tiên sibling custom domains như `app.school.edu.vn` và `api.school.edu.vn`; deployment dùng domain mặc định Vercel/Render có same-origin API proxy riêng để tránh mất cookie phiên.
 - Thêm runbook phân rõ phần người vận hành và Codex; production secret không được đưa vào repository, command output hoặc chat.
 
 ## Verification evidence
@@ -18,6 +18,7 @@ Trạng thái: **IN PROGRESS — RENDER/VERCEL REPOSITORY PREPARATION PASS, EXTE
 | Frontend lint | PASS |
 | Frontend TypeScript | PASS |
 | Frontend production build | PASS — 23 routes |
+| Vercel same-origin proxy build | PASS — `/api/v1/*` rewrite sang Render, standalone tắt trên Vercel |
 | npm audit high | PASS — 0 vulnerability |
 | Backend `clean verify` | PASS, gồm unit/integration/Testcontainers và `ExternalDatabaseUrlTest` |
 | Valid production fixture | PASS |

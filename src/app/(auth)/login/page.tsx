@@ -37,8 +37,8 @@ export default function LoginPage() {
 
   return <main className="grid min-h-screen lg:grid-cols-[1.05fr_.95fr]">
     <section className="hidden bg-[var(--sidebar)] p-12 text-white lg:flex lg:flex-col lg:justify-between">
-      <div className="flex items-center gap-3"><span className="rounded-xl bg-white/10 p-3"><BookOpenCheck/></span><span className="font-bold">TRƯỜNG THPT · KẾ HOẠCH TUẦN</span></div>
-      <div className="max-w-xl"><p className="eyebrow !text-emerald-200">Một nơi để cả trường cùng nắm kế hoạch</p><h1 className="mt-4 text-5xl font-bold leading-tight">Tuần học rõ ràng.<br/>Công việc đúng nhịp.</h1><p className="mt-6 max-w-lg text-lg leading-8 text-emerald-50/70">Theo dõi kế hoạch, nhiệm vụ và những nội dung liên quan trực tiếp đến bạn trong một giao diện gọn gàng.</p></div>
+      <div className="flex items-center gap-3"><span className="rounded-xl bg-white/10 p-3"><BookOpenCheck/></span><span className="font-bold">TRƯỜNG THPT SỐ 2 PHAN BỘI CHÂU GIA LAI</span></div>
+      <div className="max-w-xl"><p className="eyebrow !text-emerald-200">Trường THPT số 2 Phan Bội Châu Gia Lai</p><h1 className="mt-4 text-5xl font-bold leading-tight">Cổng thông tin<br/>theo dõi kế hoạch dành cho giáo viên - cán bộ</h1><p className="mt-6 max-w-lg text-lg leading-8 text-emerald-50/70">Theo dõi kế hoạch tuần, phân công và nhắc lịch dễ dàng.</p></div>
       <p className="text-sm text-emerald-100/80">Hệ thống nội bộ · Dữ liệu được bảo vệ</p>
     </section>
     <section className="flex items-center justify-center bg-white p-6"><div className="w-full max-w-md">

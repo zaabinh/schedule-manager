@@ -1,4 +1,4 @@
-import type { AcademicWeek, AcademicYear, AuditEntry, BusinessRole, Conversation, Department, EventItem, Notification, PlanStatus, Reminder, SchoolClass, SectionType, Session, TargetType, Task, User, WeekType, WeeklyPlan } from "@/types/domain";
+import type { AcademicWeek, AcademicYear, AuditEntry, BusinessRole, Conversation, Department, EventItem, Notification, PlanStatus, Reminder, SchoolClass, SectionType, Session, TargetType, Task, TaskAttachment, User, WeekType, WeeklyPlan } from "@/types/domain";
 import { apiDownload, apiRequest, clearCsrfToken } from "@/services/http";
 
 export interface AuthService { getCurrentUser(): Promise<User>; register(input: { email: string; password: string; displayName: string }): Promise<{ id: string; status: string }>; login(email: string, password: string): Promise<User>; logout(): Promise<void> }
@@ -38,7 +38,7 @@ export interface ClassService { list(): Promise<SchoolClass[]>; options(): Promi
 export interface DepartmentService { list(): Promise<Department[]>; create(input: ResourceWrite): Promise<Department>; update(id: string, input: ResourceWrite & { isActive: boolean; version: number }): Promise<Department> }
 export interface BusinessRoleService { list(): Promise<BusinessRole[]>; create(input: ResourceWrite): Promise<BusinessRole>; update(id: string, input: ResourceWrite & { isActive: boolean; version: number }): Promise<BusinessRole> }
 export interface TaskWrite { weeklyPlanId: string; assigneeUserId: string; title: string; description?: string; dueAt: string }
-export interface TaskService { listMine(): Promise<Task[]>; listAll(): Promise<Task[]>; complete(id: string): Promise<Task>; create(input: TaskWrite): Promise<Task>; summary(): Promise<{total:number;completed:number;incomplete:number;overdue:number}>; options(): Promise<{plans:ApiRef[];users:ApiRef[]}> }
+export interface TaskService { listMine(): Promise<Task[]>; listAll(): Promise<Task[]>; complete(id: string): Promise<Task>; create(input: TaskWrite): Promise<Task>; summary(): Promise<{total:number;completed:number;incomplete:number;overdue:number}>; options(): Promise<{plans:ApiRef[];users:ApiRef[]}>; listAttachments(taskId:string):Promise<TaskAttachment[]>; uploadAttachment(taskId:string,file:File):Promise<TaskAttachment>; downloadAttachment(attachment:TaskAttachment):Promise<void>; deleteAttachment(id:string):Promise<void> }
 export interface NotificationService { list(read?: boolean): Promise<Notification[]>; unreadCount(): Promise<number>; markRead(id: string): Promise<void>; markAllRead(): Promise<number> }
 export interface ReminderService { listMine(): Promise<Reminder[]>; create(event: EventItem, preset: "MINUTES_15" | "MINUTES_30" | "HOUR_1" | "DAY_1" | "CUSTOM", remindAt?: string): Promise<Reminder>; cancel(id: string): Promise<void> }
 export interface ConversationService { list(): Promise<Conversation[]>; create(subject: string, category: string | undefined, message: string): Promise<Conversation>; sendMessage(id: string, content: string): Promise<Conversation>; close(id: string): Promise<Conversation> }
@@ -55,7 +55,7 @@ type ApiBusinessRole = ApiDepartment & { isProtected: boolean };
 type ApiSchoolClass = { id: string; academicYear: ApiRef; name: string; grade: 10 | 11 | 12; homeroomTeacher: ApiRef | null; isActive: boolean; version: number };
 type ApiAcademicYear = { id: string; name: string; startDate: string; isActive: boolean; version: number; weekCount: number };
 type ApiAcademicWeek = { id: string; academicYearId: string; sequenceNumber: number; displayNumber: number; weekType: WeekType; startDate: string; endDate: string; version: number; warnings: string[] };
-type ApiTask = { id:string;weeklyPlanId:string;assignee:ApiRef;title:string;description:string|null;dueAt:string;status:Task["status"];displayStatus:Task["displayStatus"];completedAt:string|null;version:number };
+type ApiTask = { id:string;weeklyPlanId:string;assignee:ApiRef;title:string;description:string|null;dueAt:string;status:Task["status"];displayStatus:Task["displayStatus"];completedAt:string|null;version:number;attachmentCount:number };
 type ApiPlanWeek = { id: string; academicYearId: string; sequenceNumber: number; label: string; startDate: string; endDate: string; planStatus: PlanStatus | null };
 type ApiWeeklyPlan = { id: string; weekId: string; sequenceNumber: number; displayLabel: string; startDate: string; endDate: string; status: PlanStatus; version: number;
   publishedAt: string | null; publishedBy: string | null;
@@ -70,7 +70,7 @@ const mapClass = (value: ApiSchoolClass): SchoolClass => ({ id: value.id, academ
   isActive: value.isActive, version: value.version });
 const mapAcademicWeek = (value: ApiAcademicWeek): AcademicWeek => ({ ...value,
   label: value.weekType === "ORIENTATION" ? `Tuần định hướng ${value.displayNumber}` : `Tuần ${value.displayNumber}` });
-const mapTask=(value:ApiTask):Task=>({id:value.id,weeklyPlanId:value.weeklyPlanId,assigneeId:value.assignee.id,assigneeName:value.assignee.name,title:value.title,description:value.description??undefined,dueAt:value.dueAt,status:value.status,displayStatus:value.displayStatus,completedAt:value.completedAt??undefined,version:value.version});
+const mapTask=(value:ApiTask):Task=>({id:value.id,weeklyPlanId:value.weeklyPlanId,assigneeId:value.assignee.id,assigneeName:value.assignee.name,title:value.title,description:value.description??undefined,dueAt:value.dueAt,status:value.status,displayStatus:value.displayStatus,completedAt:value.completedAt??undefined,version:value.version,attachmentCount:value.attachmentCount??0});
 const mapWeeklyPlan = (value: ApiWeeklyPlan): WeeklyPlan => ({ id: value.id, weekId: value.weekId,
   sequenceNumber: value.sequenceNumber, displayLabel: value.displayLabel, startDate: value.startDate, endDate: value.endDate,
   status: value.status, version: value.version, morningDutyClassId: value.morningDutyClass?.id,
@@ -161,6 +161,10 @@ export const taskService: TaskService = {
   async complete(id) { const current=(await this.listMine()).find((item)=>item.id===id); if(!current) throw new Error("Không tìm thấy nhiệm vụ"); return mapTask(await apiRequest<ApiTask>(`/tasks/${id}/complete`,{method:"PATCH",body:JSON.stringify({version:current.version??0})})); },
   async create(input){return mapTask(await apiRequest<ApiTask>("/tasks",{method:"POST",body:JSON.stringify(input)}));},
   async summary(){return apiRequest("/tasks/summary");}, async options(){return apiRequest("/tasks/options");},
+  async listAttachments(taskId){return apiRequest<TaskAttachment[]>(`/tasks/${taskId}/attachments`);},
+  async uploadAttachment(taskId,file){const body=new FormData();body.append("file",file);return apiRequest<TaskAttachment>(`/tasks/${taskId}/attachments`,{method:"POST",body});},
+  async downloadAttachment(attachment){const blob=await apiDownload(`/task-attachments/${attachment.id}/download`);const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download=attachment.originalName;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);},
+  async deleteAttachment(id){await apiRequest<void>(`/task-attachments/${id}`,{method:"DELETE"});},
 };
 export const notificationService: NotificationService = {
   async list(read) { return apiRequest<Notification[]>(`/notifications${read===undefined?"":`?read=${read}`}`); },

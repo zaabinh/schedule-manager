@@ -147,6 +147,17 @@ Relevant item trả `{kind,entityId,title,matchedBy:[ALL|ROLE|DEPARTMENT|USER|TA
 
 Task response có persisted `status` và derived `displayStatus` (`TODO|COMPLETED|OVERDUE`), tránh client tự lệch clock.
 
+### Task attachment
+
+| Method/path | Actor | Request -> response | Validation | Errors/status |
+|---|---|---|---|---|
+| `POST /tasks/{taskId}/attachments` | A | multipart `file` -> TaskAttachment | task; count/size/total; extension+MIME+signature | `201`; `403/404/413/422/503` |
+| `GET /tasks/{taskId}/attachments` | A/assignee | -> list TaskAttachment | ownership | `200`; `403/404` |
+| `GET /task-attachments/{id}/download` | A/assignee | -> binary | ownership; active metadata/object | `200`; `403/404/503` |
+| `DELETE /task-attachments/{id}` | A | -> none | CSRF; object delete trước metadata | `204`; `403/404/503` |
+
+`TaskAttachment = {id,taskId,originalName,contentType,fileSize,checksum,createdAt}`. Download trả `Content-Type`, `Content-Length`, `Content-Disposition: attachment` với `filename*` UTF-8 và `X-Content-Type-Options: nosniff`; không trả storage key/public URL. Task response bổ sung additive field `attachmentCount`.
+
 ## 8. Notification và Reminder
 
 Không expose `POST /notifications` broadcast tự do trong hợp đồng hiện tại; ý nghĩa Quick Action “Create Notification” là **OPEN QUESTION-07**. Các notification MVP được tạo từ publish/update plan, Task, duty class, Conversation và reminder đã định nghĩa.

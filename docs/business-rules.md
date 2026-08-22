@@ -60,6 +60,14 @@ Input: User active và WeeklyPlan published. Output: danh sách deduplicate, kè
 
 ## Task, Notification và Reminder
 
+| ID | Quy tắc attachment | Rationale / edge case |
+|---|---|---|
+| BR-043 | Task có tối đa 10 attachment active; một file tối đa 20 MiB; tổng active tối đa 100 MiB. | Các giới hạn cấu hình được và được kiểm tra lại trong transaction có lock theo Task để chặn race. |
+| BR-044 | Chỉ Admin upload/delete; Admin và assignee active được list/download; User khác nhận `403`. | UUID không phải authorization; service kiểm tra ownership chống IDOR. |
+| BR-045 | Chỉ nhận PDF/Office/TXT/CSV/JPEG/PNG/ZIP trong whitelist; extension, MIME và signature phải khớp. | Executable/script và nội dung giả định dạng bị chặn. |
+| BR-046 | Storage key do server sinh, không chứa original filename; original filename chỉ dùng hiển thị và download. | Chống overwrite, traversal, header injection và lỗi Unicode filesystem. |
+| BR-047 | Upload lưu binary trước rồi metadata/audit; metadata fail phải best-effort xóa binary. Delete phải xóa binary thành công trước khi soft-delete metadata/audit. | PostgreSQL và object storage không có transaction ACID chung; lỗi storage không được swallow. |
+
 | ID | Quy tắc | Rationale / edge case |
 |---|---|---|
 | BR-028 | Task persisted status chỉ `TODO`, `COMPLETED`. | `OVERDUE = status != COMPLETED AND dueAt < now`. |

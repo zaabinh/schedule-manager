@@ -48,6 +48,7 @@ Stack: JUnit 5, AssertJ, Mockito chỉ cho port; Spring Boot Test + MockMvc; Tes
 | CF-12 | Conversation open → messages → close | ownership, notify other side, closed rejects message |
 | CF-13 | Excel export | Unicode, 5 sections, date/session/Event range, DRAFT watermark |
 | CF-14 | Audit | old/new/actor/correlation, redaction, no update/delete, Admin only |
+| CF-15 | Task attachment | Admin upload DOCX/PDF, retry riêng file lỗi, assignee list/download/complete, User khác direct URL `403`, Admin delete/audit |
 
 ## 4. Business-rule coverage
 
@@ -82,6 +83,8 @@ Chạy toàn bộ Flyway từ empty và upgrade từ bản release trước. Ass
 Component tests: keyboard/focus/modal warning, unsaved/stale version error, screen reader labels, loading/empty/error. Playwright không phụ thuộc text dễ đổi nếu có role/label ổn định; seed qua API fixture, cleanup transaction/database namespace.
 
 ## 6. Security test matrix
+
+Task attachment matrix bắt buộc: valid PDF/DOCX/Unicode; executable extension; MIME mismatch; fake signature; empty/oversize; file-count và total-size; unauthenticated/USER upload; Admin/assignee download; User khác list/direct download `403`; USER/Admin delete; CSRF; storage unavailable; DB metadata failure gọi compensating delete; local storage traversal/create/read/delete/missing object. Frontend test picker/extension/size/count/total; Playwright kiểm tra loading, partial failure, retry, list, download và visibility delete theo role.
 
 Mỗi protected endpoint chạy: unauthenticated `401`; wrong role `403` hoặc hidden `404`; pending/inactive; CSRF missing/invalid; owner vs other User; malformed UUID/body; mass-assignment fields (`systemRole`, `createdBy`); SQL/XSS strings; oversized content; rate limit. Verify cookie flags/CORS/CSP và logs không chứa password/token.
 

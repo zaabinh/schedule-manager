@@ -26,6 +26,11 @@ spring:
   jackson:
     time-zone: UTC
 
+  servlet:
+    multipart:
+      max-file-size: ${MULTIPART_MAX_FILE_SIZE:100MB}
+      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:110MB}
+
   mail:
     host: ${SMTP_HOST:localhost}
     port: ${SMTP_PORT:1025}
@@ -80,6 +85,13 @@ app:
     poll-delay-ms: ${REMINDER_POLL_DELAY_MS:60000}
     initial-delay-ms: ${REMINDER_INITIAL_DELAY_MS:60000}
     max-attempts: ${REMINDER_MAX_ATTEMPTS:3}
+
+  task-attachments:
+    max-files: ${TASK_ATTACHMENT_MAX_FILES:10}
+    max-file-size-bytes: ${TASK_ATTACHMENT_MAX_FILE_SIZE_BYTES:20971520}
+    max-total-size-bytes: ${TASK_ATTACHMENT_MAX_TOTAL_SIZE_BYTES:104857600}
+    storage: ${FILE_STORAGE_TYPE:local}
+    local-root: ${FILE_STORAGE_LOCAL_ROOT:./data/uploads}
 
   security:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}

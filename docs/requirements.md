@@ -98,6 +98,22 @@ Mức ưu tiên: `MUST` bắt buộc trong MVP, `SHOULD` cần có nếu không 
 | FR-TASK-003 | Admin xem thống kê tổng/hoàn thành/chưa hoàn thành/quá hạn. | ADMIN | MUST | `OVERDUE` tính tại thời điểm truy vấn, không persisted. |
 | FR-TASK-004 | Admin cập nhật task và phát notification khi thay đổi có ý nghĩa. | ADMIN | MUST | Assignee nhận notification; thay đổi được audit. |
 
+### 3.5.1 Tệp đính kèm Task
+
+| ID | Yêu cầu | Actor | Ưu tiên | Tiêu chí chấp nhận |
+|---|---|---|---|---|
+| FR-TASK-FILE-001 | Admin tải nhiều tệp đính kèm cho Task, kể cả Task đã tồn tại. | ADMIN | MUST | Tối đa 10 tệp; lỗi một tệp không rollback Task hoặc tệp khác. |
+| FR-TASK-FILE-002 | Assignee xem danh sách và tải attachment của Task được giao. | USER | MUST | Tên Unicode và Content-Type/Length/Disposition đúng. |
+| FR-TASK-FILE-003 | User khác không được truy cập attachment. | SYSTEM | MUST | List/download trực tiếp trả `403`; có automated IDOR test. |
+| FR-TASK-FILE-004 | Giữ tên file gốc cho hiển thị/download nhưng storage key chỉ do server sinh. | SYSTEM | MUST | Tên gốc không tham gia đường dẫn lưu trữ. |
+
+| ID | Yêu cầu bảo mật tệp | Ưu tiên | Tiêu chí kiểm chứng |
+|---|---|---|---|
+| NFR-FILE-SEC-001 | Backend kiểm tra size, extension, MIME và signature/magic bytes hỗ trợ. | MUST | Executable, MIME/signature giả và file quá giới hạn bị chặn. |
+| NFR-FILE-SEC-002 | Storage key không dùng trực tiếp input người dùng. | MUST | Key dạng `tasks/{taskId}/{attachmentId}.{ext}` và path traversal test pass. |
+| NFR-FILE-SEC-003 | Download luôn authorization qua backend, không expose public object URL. | MUST | Admin/assignee pass; User khác `403`. |
+| NFR-FILE-SEC-004 | Binary nằm ngoài relational database. | MUST | DB chỉ lưu metadata/checksum; storage có port thay thế được. |
+
 ### 3.6 Notification và email
 
 | ID | Yêu cầu | Actor | Ưu tiên | Tiêu chí chấp nhận |

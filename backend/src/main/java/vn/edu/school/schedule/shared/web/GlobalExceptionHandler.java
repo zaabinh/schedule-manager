@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import vn.edu.school.schedule.shared.api.ApiError;
 import vn.edu.school.schedule.shared.api.ApiException;
 import vn.edu.school.schedule.shared.api.ApiFieldError;
@@ -28,6 +29,12 @@ public class GlobalExceptionHandler {
                 .toList();
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(ApiResponse.failure(
                 new ApiError("VALIDATION_FAILED", "Dữ liệu không hợp lệ.", details), correlationId()));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<ApiResponse<Void>> multipartTooLarge(MaxUploadSizeExceededException exception) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(ApiResponse.failure(
+                new ApiError("MULTIPART_TOO_LARGE", "Yêu cầu tải tệp vượt quá giới hạn máy chủ.", List.of()), correlationId()));
     }
 
     @ExceptionHandler(Exception.class)

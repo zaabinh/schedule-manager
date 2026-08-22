@@ -65,12 +65,13 @@ public class TaskService {
         TaskResponse result=task(id); audit(actor.id(),id,"TASK_COMPLETED",before,result); return result;
     }
     private String taskSql(String where){return """
-            SELECT t.id,t.weekly_plan_id,u.id,u.display_name,t.title,t.description,t.due_at,t.status,t.completed_at,t.version
+            SELECT t.id,t.weekly_plan_id,u.id,u.display_name,t.title,t.description,t.due_at,t.status,t.completed_at,t.version,
+                   (SELECT count(*) FROM task_attachments a WHERE a.task_id=t.id AND a.deleted_at IS NULL) attachment_count
             FROM tasks t JOIN users u ON u.id=t.assignee_user_id %s ORDER BY t.due_at,t.id
             """.formatted(where);}
     private TaskResponse task(UUID id){List<TaskResponse> rows=jdbc.query(taskSql("WHERE t.id=?"),(rs,row)->map(rs),id);if(rows.isEmpty())throw notFound();return rows.getFirst();}
     private TaskResponse taskForOwner(UUID id,UUID owner){List<TaskResponse> rows=jdbc.query(taskSql("WHERE t.id=? AND t.assignee_user_id=?"),(rs,row)->map(rs),id,owner);if(rows.isEmpty())throw notFound();return rows.getFirst();}
-    private TaskResponse map(java.sql.ResultSet rs)throws java.sql.SQLException{Instant due=rs.getTimestamp(7).toInstant();String status=rs.getString(8);String display="TODO".equals(status)&&due.isBefore(clock.instant())?"OVERDUE":status;return new TaskResponse(rs.getObject(1,UUID.class),rs.getObject(2,UUID.class),new ResourceRef(rs.getObject(3,UUID.class),rs.getString(4)),rs.getString(5),rs.getString(6),due,status,display,rs.getTimestamp(9)==null?null:rs.getTimestamp(9).toInstant(),rs.getLong(10));}
+    private TaskResponse map(java.sql.ResultSet rs)throws java.sql.SQLException{Instant due=rs.getTimestamp(7).toInstant();String status=rs.getString(8);String display="TODO".equals(status)&&due.isBefore(clock.instant())?"OVERDUE":status;return new TaskResponse(rs.getObject(1,UUID.class),rs.getObject(2,UUID.class),new ResourceRef(rs.getObject(3,UUID.class),rs.getString(4)),rs.getString(5),rs.getString(6),due,status,display,rs.getTimestamp(9)==null?null:rs.getTimestamp(9).toInstant(),rs.getLong(10),rs.getLong(11));}
     private void requirePlan(UUID id){Long n=jdbc.queryForObject("SELECT count(*) FROM weekly_plans WHERE id=?",Long.class,id);if(n==null||n!=1)throw notFound();}
     private void requireActiveUser(UUID id){Long n=jdbc.queryForObject("SELECT count(*) FROM users WHERE id=? AND status='ACTIVE' AND system_role='USER'",Long.class,id);if(n==null||n!=1)throw validation("ASSIGNEE_INVALID","Assignee must be an active User.");}
     private String clean(String v){return v==null||v.isBlank()?null:v.trim();}

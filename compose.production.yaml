@@ -46,6 +46,8 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:?required}
       SMTP_AUTH: "true"
       SMTP_STARTTLS: "true"
+      FILE_STORAGE_TYPE: local
+      FILE_STORAGE_LOCAL_ROOT: /var/lib/schedule-manager/uploads
     depends_on:
       postgres: { condition: service_healthy }
     ports:
@@ -56,6 +58,8 @@ services:
       timeout: 5s
       retries: 12
     networks: [internal, edge]
+    volumes:
+      - attachment-data:/var/lib/schedule-manager/uploads
 
   frontend:
     build:
@@ -75,3 +79,4 @@ networks:
 
 volumes:
   postgres-data: {}
+  attachment-data: {}

@@ -35,6 +35,7 @@ Các use case dùng thuật ngữ và rule từ [business-rules.md](business-rul
 | UC-21 | Reply/Close Conversation | ADMIN, USER | FR-CONV-002..003 |
 | UC-22 | Review AuditLog | ADMIN | FR-AUDIT-002 |
 | UC-23 | Export WeeklyPlan | ADMIN | FR-EXPORT-001 |
+| UC-24 | Manage Task Attachments | ADMIN, USER | FR-TASK-FILE-001..004 |
 
 ## ADMIN use cases
 
@@ -271,6 +272,16 @@ Các use case dùng thuật ngữ và rule từ [business-rules.md](business-rul
 - **Postconditions:** message append-only hoặc thread CLOSED.
 - **Rules:** BR-037..039.
 
+### UC-24 — Manage Task Attachments
+
+- **Actor/Goal:** Admin đính kèm tài liệu hướng dẫn; assignee xem và tải tài liệu của Task.
+- **Preconditions:** Task tồn tại; actor active; upload/delete yêu cầu Admin, list/download yêu cầu Admin hoặc assignee.
+- **Main flow:** Admin chọn tệp; frontend kiểm tra sớm; backend kiểm tra giới hạn, extension, MIME và signature; sinh attachment ID/storage key; lưu binary; transaction lưu metadata + audit. Assignee tải qua endpoint có authorization.
+- **Alternative:** Một tệp upload lỗi thì Task và các tệp thành công được giữ; frontend cho thử lại riêng tệp lỗi. Admin có thể thêm/xóa tệp trên Task đã tồn tại.
+- **Exception:** file/total/count/type invalid `422`; storage lỗi `503`; User khác `403`; missing `404`; thiếu CSRF `403`.
+- **Postconditions:** add/remove có audit; xóa storage lỗi không báo thành công; DB insert lỗi kích hoạt best-effort cleanup.
+- **Rules:** BR-043..047.
+
 ## SYSTEM / scheduled use cases
 
 ### UC-18 — Deliver Due Reminder
@@ -294,4 +305,3 @@ Các use case dùng thuật ngữ và rule từ [business-rules.md](business-rul
 - **Exception:** provider lỗi dùng outbox retry; không chạy lại logic tạo bản ghi trùng.
 - **Postconditions:** tối đa một email/slot/Admin.
 - **Rules:** BR-036.
-

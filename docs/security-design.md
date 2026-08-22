@@ -50,7 +50,16 @@ Headers: HSTS (production), `Content-Security-Policy`, `X-Content-Type-Options: 
 
 ### SQL injection và validation
 
-JPA parameter binding/Criteria; cấm nối raw query với sort/filter. Sort allowlist. Bean Validation ở DTO và invariant domain; giới hạn JSON/body/message/content, page size, date range. Upload không thuộc MVP.
+JPA/JdbcTemplate parameter binding; cấm nối raw query với sort/filter. Sort allowlist. Bean Validation ở DTO và invariant domain; giới hạn JSON/body/message/content, page size, date range. Task attachment là upload duy nhất trong MVP và áp dụng kiểm soát riêng dưới đây.
+
+### Task attachment security
+
+- Allowlist extension + declared MIME + signature/magic bytes; OOXML phải là ZIP package chứa namespace `word/`, `xl/` hoặc `ppt/`. Executable/script bị chặn.
+- Tên gốc được normalize, loại path/control characters và chỉ dùng display/download. Storage key UUID do server sinh; local adapter normalize đường dẫn và bắt buộc target nằm dưới root cấu hình.
+- Backend authorization mọi list/download: `ADMIN` hoặc `task.assignee_user_id=currentActor.id`; User khác nhận `403`. Không expose bucket URL và không dựa vào UUID khó đoán.
+- File tối đa 20 MiB, 10 file/Task, tổng 100 MiB; servlet có hard ceiling riêng và service là enforcement point. Count/total được kiểm tra khi lock Task để tránh race.
+- Download ép `attachment`, filename UTF-8 và `nosniff`. Không log content/binary. Audit chỉ metadata/checksum.
+- Local production storage cần persistent volume/disk và backup cùng DB metadata. Malware scanning chưa triển khai; phase sau thêm quarantine → scan → available trước khi cân nhắc signed URL.
 
 ## 5. IDOR và approval security
 

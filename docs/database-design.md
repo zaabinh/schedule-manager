@@ -273,6 +273,23 @@ Indexes partial due `(COALESCE(next_attempt_at,remind_at)) WHERE status='PENDING
 
 Index `(user_id,read_at,created_at DESC)` INCLUDE notification_id.
 
+### `task_attachments` (Flyway V7)
+
+| Column | Type | Null/default/key | Mô tả |
+|---|---|---|---|
+| id | uuid | PK | Server-generated attachment ID |
+| task_id | uuid | NOT NULL FK tasks RESTRICT | Task sở hữu |
+| uploaded_by | uuid | NOT NULL FK users RESTRICT | Admin upload |
+| original_name | varchar(255) | NOT NULL | Tên đã normalize để hiển thị/download, không dùng làm path |
+| storage_key | varchar(500) | NOT NULL UNIQUE | `tasks/{taskId}/{attachmentId}.{ext}` |
+| content_type | varchar(255) | NOT NULL | MIME đã qua allowlist |
+| file_size | bigint | NOT NULL CHECK >0 | Byte thực tế storage trả về |
+| checksum | varchar(64) | NULL CHECK SHA-256 hex | Integrity/dedup extension point |
+| created_at | timestamptz | NOT NULL | Thời điểm thêm |
+| deleted_at | timestamptz | NULL | Soft delete sau khi xóa binary thành công |
+
+Partial index `(task_id,created_at,id) WHERE deleted_at IS NULL` phục vụ list/count/total. Binary nằm trong storage ngoài DB; không dùng BYTEA/BLOB/Base64.
+
 ## 5. Conversation và audit
 
 ### `conversations` và `conversation_messages`

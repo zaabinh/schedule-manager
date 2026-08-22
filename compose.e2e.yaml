@@ -56,6 +56,7 @@ services:
       REMINDER_POLL_DELAY_MS: "250"
       OUTBOX_INITIAL_DELAY_MS: "100"
       OUTBOX_POLL_DELAY_MS: "250"
+      FILE_STORAGE_LOCAL_ROOT: /tmp/schedule-manager/uploads
     depends_on:
       postgres-e2e:
         condition: service_healthy

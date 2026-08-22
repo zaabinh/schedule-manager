@@ -241,8 +241,15 @@ backend/target/schedule-manager-backend-0.1.0-SNAPSHOT.jar
 | `SESSION_COOKIE_SECURE` | `false` | Phải là `true` trên HTTPS production |
 | `SESSION_PEPPER` | local fallback | Secret dùng hash session/CSRF; production phải thay |
 | `BOOTSTRAP_ADMIN_ENABLED` | `false` | Bật đúng một lần để tạo Admin đầu tiên |
+| `TASK_ATTACHMENT_MAX_FILES` | `10` | Số tệp active tối đa trên một Task |
+| `TASK_ATTACHMENT_MAX_FILE_SIZE_BYTES` | `20971520` | Dung lượng tối đa một tệp (20 MiB) |
+| `TASK_ATTACHMENT_MAX_TOTAL_SIZE_BYTES` | `104857600` | Tổng dung lượng tối đa một Task (100 MiB) |
+| `FILE_STORAGE_TYPE` | `local` | Adapter lưu tệp; hiện có `local`, có thể bổ sung S3-compatible |
+| `FILE_STORAGE_LOCAL_ROOT` | `./data/uploads` | Root local; production container dùng persistent mount `/var/lib/schedule-manager/uploads` |
 
 Production nên dùng cookie `__Host-session`, HTTPS và secret manager; không sử dụng credential local trong môi trường thật.
+
+Task attachment dùng filesystem local trong development. Production Compose tạo volume `attachment-data`; Render Blueprint tạo persistent disk `task-attachments`. Không deploy attachment bằng filesystem tạm/ephemeral, nếu không binary sẽ mất khi instance restart dù metadata còn trong PostgreSQL. Backup phải bao gồm cả database và volume attachment.
 
 ## Dừng local services
 

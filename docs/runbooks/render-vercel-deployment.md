@@ -16,7 +16,7 @@ Mục tiêu là chạy frontend Next.js trên Vercel, API Spring Boot và Postgr
 ### Render
 
 1. Vào Render Dashboard, chọn **New > Blueprint**, kết nối repository và chọn branch `main`.
-2. Render đọc `render.yaml` và đề xuất một web service cùng một PostgreSQL database. Xem lại region/plan/chi phí rồi mới Apply.
+2. Render đọc `render.yaml` và đề xuất một web service, một PostgreSQL database và persistent disk `task-attachments` gắn tại `/var/lib/schedule-manager`. Xem lại region/plan/dung lượng disk/chi phí rồi mới Apply; không bỏ disk nếu dùng Task attachment.
 3. Điền các biến được Render yêu cầu. Không gửi các giá trị bí mật qua chat và không commit chúng:
 
 | Biến | Giá trị |
@@ -30,6 +30,8 @@ Mục tiêu là chạy frontend Next.js trên Vercel, API Spring Boot và Postgr
 | `SMTP_HOST` | Host SMTP của provider |
 | `SMTP_USERNAME` | Tài khoản SMTP |
 | `SMTP_PASSWORD` | Secret SMTP |
+
+`FILE_STORAGE_TYPE=local` và `FILE_STORAGE_LOCAL_ROOT=/var/lib/schedule-manager/uploads` đã nằm trong Blueprint. Sau deploy, upload một tệp kiểm tra, restart service và xác nhận vẫn download được để chứng minh disk thực sự persistent. Backup/restore production phải ghép đúng snapshot PostgreSQL metadata với snapshot disk attachment.
 
 4. Blueprint tự sinh `SESSION_PEPPER`, nhận `DATABASE_URL` từ database và chạy initial deploy hook để tạo Admin đúng một lần. Chờ web service có trạng thái Live và `/actuator/health/readiness` trả `UP`.
 5. Trong Render, thêm custom domain `api.<domain-cua-ban>` và tạo DNS record đúng theo hướng dẫn Render hiển thị. Chờ TLS được cấp thành công.

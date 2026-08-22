@@ -27,7 +27,8 @@ export interface WeeklyPlan {
   afternoonDutyClassId?: string; afternoonDutyClass?: string;
   sections: PlanSection[]; days: PlanDay[];
 }
-export interface Task { id: string; title: string; description?: string; dueAt: string; status: TaskStatus; displayStatus?: DisplayTaskStatus; weeklyPlanId: string; assigneeId?: string; assigneeName?: string; completedAt?: string; version?: number }
+export interface Task { id: string; title: string; description?: string; dueAt: string; status: TaskStatus; displayStatus?: DisplayTaskStatus; weeklyPlanId: string; assigneeId?: string; assigneeName?: string; completedAt?: string; version?: number; attachmentCount?: number }
+export interface TaskAttachment { id: string; taskId: string; originalName: string; contentType: string; fileSize: number; checksum?: string; createdAt: string }
 export interface Notification { id: string; title: string; description: string; createdAt: string; readAt?: string; type: string }
 export interface Reminder { id: string; eventId: string; eventTitle: string; remindAt: string; source: "ADMIN" | "USER"; status: "PENDING" | "PROCESSING" | "SENT" | "FAILED" | "CANCELLED" }
 export interface Message { id: string; senderId: string; senderName: string; content: string; createdAt: string }

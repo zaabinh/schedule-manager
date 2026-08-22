@@ -20,7 +20,7 @@ class CleanDatabaseMigrationIT {
                     .load()
                     .migrate();
             assertThat(result.success).isTrue();
-            assertThat(result.migrationsExecuted).isGreaterThanOrEqualTo(4);
+            assertThat(result.migrationsExecuted).isGreaterThanOrEqualTo(7);
             try (var connection = DriverManager.getConnection(
                     postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
                  var statement = connection.prepareStatement(
@@ -28,6 +28,16 @@ class CleanDatabaseMigrationIT {
                  var rows = statement.executeQuery()) {
                 rows.next();
                 assertThat(rows.getInt(1)).isGreaterThanOrEqualTo(20);
+            }
+            try (var connection = DriverManager.getConnection(
+                    postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+                 var statement = connection.prepareStatement("""
+                         select count(*) from information_schema.tables
+                         where table_schema='public' and table_name='task_attachments'
+                         """);
+                 var rows = statement.executeQuery()) {
+                rows.next();
+                assertThat(rows.getInt(1)).isEqualTo(1);
             }
             try (var connection = DriverManager.getConnection(
                     postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());

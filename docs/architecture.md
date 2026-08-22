@@ -135,6 +135,14 @@ JSON logs có timestamp, level, service/version, correlation ID, actor ID (khôn
 
 ADR-001 modular monolith; ADR-002 opaque cookie session; ADR-003 transactional outbox; ADR-004 SchoolClass thuộc AcademicYear; ADR-005 audit cùng transaction. Các **OPEN QUESTION** về provider email, retention, MFA và mẫu Excel phải được chốt trước production.
 
+## 12.1 Task attachment storage
+
+`task` sở hữu `TaskAttachmentService`, validation và storage port `FileStorage`. `LocalFileStorage` là adapter mặc định; business logic chỉ biết port nên có thể bổ sung S3/R2/MinIO/B2 adapter bằng cấu hình mà không sửa Task rules. Binary không vào PostgreSQL; DB chỉ giữ metadata và SHA-256.
+
+Local adapter resolve key server-generated dưới một root cấu hình, normalize + kiểm tra containment, ghi qua temporary file rồi atomic move khi filesystem hỗ trợ. Container chạy non-root và dùng `/var/lib/schedule-manager/uploads`; production phải gắn persistent disk/volume. Render Blueprint và production Compose đã khai báo disk/volume này.
+
+Upload dùng flow storage → transaction metadata/audit, với best-effort compensating delete nếu transaction lỗi. Delete lock metadata, xóa storage trước rồi soft-delete/audit trong transaction. Malware scanner chưa có trong MVP; port cho phép thêm trạng thái quarantine/scan adapter ở phase sau mà không đổi API tải xuống.
+
 ## 13. Implementation baseline (2026-08-19)
 
 Backend dùng Spring Boot 4.1.0, Java release 21, Maven Wrapper và cấu trúc package gốc `vn.edu.school.schedule`. `shared` cung cấp API envelope, validation error mapping, correlation ID và security deny-by-default; toàn bộ module nghiệp vụ Phase 1–11 đã tích hợp PostgreSQL. ArchUnit kiểm soát chiều phụ thuộc `shared <- feature`.

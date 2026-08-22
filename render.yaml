@@ -9,6 +9,10 @@ services:
     autoDeployTrigger: checksPass
     healthCheckPath: /actuator/health/readiness
     maxShutdownDelaySeconds: 60
+    disk:
+      name: task-attachments
+      mountPath: /var/lib/schedule-manager
+      sizeGB: 1
     initialDeployHook: >-
       java -XX:MaxRAMPercentage=75 -jar /app/app.jar --server.port=0
       --app.bootstrap-admin.enabled=true
@@ -52,6 +56,10 @@ services:
         sync: false
       - key: SCHOOL_TIME_ZONE
         value: Asia/Ho_Chi_Minh
+      - key: FILE_STORAGE_TYPE
+        value: local
+      - key: FILE_STORAGE_LOCAL_ROOT
+        value: /var/lib/schedule-manager/uploads
       - key: EMAIL_PROVIDER
         value: smtp
       - key: EMAIL_FROM

@@ -91,6 +91,7 @@ class Phase4WeeklyPlanIT {
         jdbc.update("DELETE FROM api_idempotency_keys");
         jdbc.update("DELETE FROM scheduler_job_runs");
         jdbc.update("DELETE FROM auth_sessions");
+        jdbc.update("DELETE FROM task_attachments");
         jdbc.update("DELETE FROM tasks");
         jdbc.update("DELETE FROM reminders");
         jdbc.update("DELETE FROM conversation_messages");

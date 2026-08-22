@@ -1,8 +1,8 @@
 FROM maven:3.9.11-eclipse-temurin-21 AS build
 WORKDIR /workspace
-COPY pom.xml pom.xml
+COPY backend/pom.xml pom.xml
 RUN mvn --batch-mode --file pom.xml dependency:go-offline
-COPY src src
+COPY backend/src src
 RUN mvn --batch-mode --file pom.xml -DskipTests package
 
 FROM eclipse-temurin:21-jre

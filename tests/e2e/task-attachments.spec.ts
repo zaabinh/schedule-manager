@@ -60,8 +60,10 @@ test.describe("task attachment critical flow", () => {
       await page.goto("/admin/tasks");
       await page.getByRole("button", { name: "Giao nhiệm vụ" }).click();
       const dialog = page.getByRole("dialog", { name: "Giao nhiệm vụ" });
-      await dialog.getByLabel("Kế hoạch tuần *").selectOption(plan.id);
-      await dialog.getByLabel("Người nhận *").selectOption(assignee.id);
+      await dialog.getByRole("button", { name: "Kế hoạch tuần" }).click();
+      await page.locator(`[role="option"][data-value="${plan.id}"]`).click();
+      await dialog.getByRole("button", { name: "Người nhận" }).click();
+      await page.locator(`[role="option"][data-value="${assignee.id}"]`).click();
       await dialog.getByLabel("Tiêu đề *").fill(taskTitle);
       await dialog.getByLabel("Hạn hoàn thành *").fill("2040-09-01T17:00");
       await dialog.getByLabel("Chọn tệp đính kèm").setInputFiles([

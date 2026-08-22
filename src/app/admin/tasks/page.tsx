@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardPlus } from "lucide-react";
+import { CalendarRange, ClipboardPlus, UserRound } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { taskService } from "@/services";
@@ -11,6 +11,7 @@ import { TaskCard } from "@/components/task/task-card";
 import { AttachmentPicker } from "@/components/task/attachment-picker";
 import { toUploadItems, validateAttachmentFiles, type UploadItem } from "@/components/task/attachment-utils";
 import { LoadingSkeleton, ErrorState, EmptyState } from "@/components/ui/states";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 export default function AdminTasksPage() {
   const client = useQueryClient();
@@ -55,6 +56,7 @@ export default function AdminTasksPage() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(undefined);
+    if (!planId || !userId) { setError("Vui lòng chọn kế hoạch tuần và người nhận."); return; }
     setSubmitting(true);
     try {
       const task = await taskService.create({ weeklyPlanId: planId, assigneeUserId: userId, title, description: description || undefined, dueAt: new Date(dueAt).toISOString() });
@@ -85,8 +87,8 @@ export default function AdminTasksPage() {
     {data.length ? <div className="grid gap-4 lg:grid-cols-2">{data.map((task) => <TaskCard key={task.id} task={task} admin/>)}</div> : <EmptyState title="Chưa có nhiệm vụ" description="Hãy giao nhiệm vụ đầu tiên."/>}
     <Dialog open={open} onOpenChange={(value) => { if (!value && !submitting) closeAndReset(); }} title="Giao nhiệm vụ" description="Nhiệm vụ được tạo trước; từng tệp sẽ tải riêng để có thể thử lại an toàn.">
       {!createdTaskId ? <form className="grid gap-4" onSubmit={submit}>
-        <label><span className="field-label">Kế hoạch tuần *</span><select required className="field" value={planId} onChange={(event) => setPlanId(event.target.value)}><option value="">Chọn kế hoạch</option>{options.data.plans.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-        <label><span className="field-label">Người nhận *</span><select required className="field" value={userId} onChange={(event) => setUserId(event.target.value)}><option value="">Chọn người nhận</option>{options.data.users.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+        <div><span className="field-label flex items-center gap-2"><CalendarRange size={15}/>Kế hoạch tuần *</span><SearchableSelect ariaLabel="Kế hoạch tuần" value={planId} onValueChange={setPlanId} placeholder="Chọn kế hoạch" searchPlaceholder="Tìm theo tuần hoặc ngày…" options={options.data.plans.map((item) => ({ value: item.id, label: item.name }))}/></div>
+        <div><span className="field-label flex items-center gap-2"><UserRound size={15}/>Người nhận *</span><SearchableSelect ariaLabel="Người nhận" value={userId} onValueChange={setUserId} placeholder="Chọn người nhận" searchPlaceholder="Tìm giáo viên…" options={options.data.users.map((item) => ({ value: item.id, label: item.name }))}/></div>
         <label><span className="field-label">Tiêu đề *</span><input required maxLength={255} className="field" value={title} onChange={(event) => setTitle(event.target.value)}/></label>
         <label><span className="field-label">Mô tả</span><textarea className="field min-h-20" value={description} onChange={(event) => setDescription(event.target.value)}/></label>
         <label><span className="field-label">Hạn hoàn thành *</span><input required type="datetime-local" className="field" value={dueAt} onChange={(event) => setDueAt(event.target.value)}/></label>

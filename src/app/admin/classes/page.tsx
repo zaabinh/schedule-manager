@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit3, Plus, Power } from "lucide-react";
+import { CalendarRange, Edit3, Plus, Power, UserRound } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { classService } from "@/services";
@@ -10,6 +10,7 @@ import { LoadingSkeleton, ErrorState } from "@/components/ui/states";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 export default function ClassesPage() {
   const query = useQuery({ queryKey: ["classes-management"], queryFn: async () => ({
@@ -70,7 +71,7 @@ export default function ClassesPage() {
       {classes.length === 0 && <tr><td colSpan={5} className="py-10 text-center text-sm text-slate-500">Chưa có lớp học.</td></tr>}
     </tbody></table></div>
     <Dialog open={editing !== undefined} onOpenChange={(value) => !value && setEditing(undefined)} title={`${editing ? "Sửa" : "Thêm"} lớp học`} description="Tên lớp là duy nhất trong một năm học; GVCN phải là giáo viên đang hoạt động.">
-      <form className="space-y-4" onSubmit={submit}><label><span className="field-label">Năm học *</span><select className="field" required value={yearId} onChange={(event) => setYearId(event.target.value)}>{options.academicYears.map((year) => <option key={year.id} value={year.id}>{year.name}</option>)}</select></label><div className="grid gap-4 sm:grid-cols-2"><label><span className="field-label">Tên lớp *</span><input className="field" required maxLength={50} value={name} onChange={(event) => setName(event.target.value)}/></label><label><span className="field-label">Khối *</span><select className="field" value={grade} onChange={(event) => setGrade(Number(event.target.value) as 10 | 11 | 12)}><option value={10}>10</option><option value={11}>11</option><option value={12}>12</option></select></label></div><label><span className="field-label">Giáo viên chủ nhiệm</span><select className="field" value={teacherId} onChange={(event) => setTeacherId(event.target.value)}><option value="">Chưa phân công</option>{teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.name}</option>)}</select></label>{error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}<div className="dialog-actions"><Button type="button" variant="secondary" onClick={() => setEditing(undefined)}>Hủy</Button><Button type="submit" disabled={busy}>{busy ? "Đang lưu…" : "Lưu"}</Button></div></form>
+      <form className="space-y-5" onSubmit={submit}><div><span className="field-label flex items-center gap-2"><CalendarRange size={15}/>Năm học *</span><SearchableSelect ariaLabel="Năm học" value={yearId} onValueChange={setYearId} placeholder="Chọn năm học" searchPlaceholder="Tìm năm học…" options={options.academicYears.map((year) => ({ value: year.id, label: year.name }))}/></div><div className="grid gap-4 sm:grid-cols-2"><label><span className="field-label">Tên lớp *</span><input className="field" required maxLength={50} value={name} onChange={(event) => setName(event.target.value)} placeholder="Ví dụ: 10A1"/></label><label><span className="field-label">Khối *</span><select className="field" value={grade} onChange={(event) => setGrade(Number(event.target.value) as 10 | 11 | 12)}><option value={10}>Khối 10</option><option value={11}>Khối 11</option><option value={12}>Khối 12</option></select></label></div><div><span className="field-label flex items-center gap-2"><UserRound size={15}/>Giáo viên chủ nhiệm</span><SearchableSelect ariaLabel="Giáo viên chủ nhiệm" value={teacherId} onValueChange={setTeacherId} placeholder="Chưa phân công" searchPlaceholder="Tìm giáo viên…" clearable options={teachers.map((teacher) => ({ value: teacher.id, label: teacher.name }))}/></div>{error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}<div className="dialog-actions"><Button type="button" variant="secondary" onClick={() => setEditing(undefined)}>Hủy</Button><Button type="submit" disabled={busy || !yearId}>{busy ? "Đang lưu…" : "Lưu"}</Button></div></form>
     </Dialog>
   </>;
 }

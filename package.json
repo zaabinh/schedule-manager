@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test:frontend": "node --experimental-strip-types --test tests/frontend/attachment-utils.test.ts",
+    "test:frontend": "node --experimental-strip-types --test tests/frontend/attachment-utils.test.ts tests/frontend/searchable-select-utils.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:full": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-full-e2e.ps1",
     "test:performance": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-performance-smoke.ps1",

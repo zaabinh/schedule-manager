@@ -5,8 +5,8 @@ import { QueryProvider } from "@/lib/query-provider";
 import { SCHOOL_LOGO_PATH, SCHOOL_NAME } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: `Kế hoạch tuần · ${SCHOOL_NAME}`,
-  description: `Hệ thống quản lý kế hoạch tuần của ${SCHOOL_NAME}`,
+  title: `Cổng thông tin theo dõi và quản lí kế hoạch`,
+  description: `Hệ thống quản lý kế hoạch của ${SCHOOL_NAME}`,
   icons: { icon: SCHOOL_LOGO_PATH, apple: SCHOOL_LOGO_PATH },
 };
 

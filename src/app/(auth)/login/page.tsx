@@ -39,8 +39,19 @@ export default function LoginPage() {
 
   return <main className="grid min-h-screen lg:grid-cols-[1.05fr_.95fr]">
     <section className="hidden bg-[var(--sidebar)] p-12 text-white lg:flex lg:flex-col lg:justify-between">
-      <div className="flex items-center gap-4"><Image src={SCHOOL_LOGO_PATH} alt={`Logo ${SCHOOL_NAME}`} width={72} height={72} priority className="h-18 w-18 rounded-xl bg-white object-contain p-1 shadow-sm"/><span className="max-w-sm font-bold leading-snug">{SCHOOL_NAME}</span></div>
-      <div className="max-w-xl"><p className="eyebrow !text-emerald-200">{SCHOOL_NAME}</p><h1 className="mt-4 text-5xl font-bold leading-tight">Cổng thông tin<br/>theo dõi kế hoạch dành cho giáo viên - cán bộ</h1><p className="mt-6 max-w-lg text-lg leading-8 text-emerald-50/70">Theo dõi kế hoạch tuần, phân công và nhắc lịch dễ dàng.</p></div>
+      <div className="flex items-center gap-4">
+        <Image src={SCHOOL_LOGO_PATH} alt={`Logo ${SCHOOL_NAME}`} width={72} height={72} priority className="h-18 w-18 rounded-xl bg-white object-contain p-1 shadow-sm"/>
+        <div>
+          <span className="block max-w-sm text-sm font-semibold leading-snug text-gray-200">
+            SỞ GIÁO DỤC VÀ ĐÀO TẠO TỈNH GIA LAI
+          </span>
+
+          <span className="block max-w-sm text-base font-bold leading-snug">
+            {SCHOOL_NAME}
+          </span>
+        </div>
+      </div>
+      <div className="max-w-xl"><p className="eyebrow !text-emerald-200">{SCHOOL_NAME}</p><h1 className="mt-4 text-5xl font-bold leading-tight">Cổng thông tin theo dõi và quản lí kế hoạch dành cho giáo viên - cán bộ</h1><p className="mt-6 max-w-lg text-lg leading-8 text-emerald-50/70">Theo dõi kế hoạch tuần, phân công và nhắc lịch dễ dàng.</p></div>
       <p className="text-sm text-emerald-100/80">Hệ thống nội bộ · Dữ liệu được bảo vệ</p>
     </section>
     <section className="flex items-center justify-center bg-white p-6"><div className="w-full max-w-md">

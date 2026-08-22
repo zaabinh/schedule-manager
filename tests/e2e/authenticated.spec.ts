@@ -77,7 +77,8 @@ test.describe("authenticated production-critical smoke", () => {
     await expect(row).toBeVisible();
     await row.getByRole("button", { name: "Xem & duyệt" }).click();
     const dialog = page.getByRole("dialog", { name: "Xem và phê duyệt tài khoản" });
-    await dialog.getByLabel("Phòng ban *").selectOption({ label: "Văn phòng E2E" });
+    await dialog.getByRole("button", { name: "Phòng ban" }).click();
+    await page.getByRole("option", { name: "Văn phòng E2E" }).click();
     await dialog.getByLabel("Giáo viên", { exact: true }).check();
     await dialog.getByRole("button", { name: "Phê duyệt", exact: true }).click();
     await expect(dialog).toBeHidden();
@@ -201,9 +202,11 @@ test.describe("authenticated production-critical smoke", () => {
       await page.getByLabel("Email").fill(teacherEmail);
       await page.getByLabel("Mật khẩu", { exact: true }).fill(teacherPassword);
       await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
-      await expect(page).toHaveURL(/\/dashboard$/);
+      await expect(page).toHaveURL(/\/dashboard$/, { timeout: 15_000 });
 
       await page.goto("/weekly-plan");
+      await expect(page.getByRole("button", { name: "Tuần cần xem" })).toBeVisible();
+      await expect(page.getByText("Kế hoạch đã xuất bản")).toBeVisible();
       const eventButton = page.getByRole("button", { name: new RegExp(eventTitle) });
       await expect(eventButton).toBeVisible();
       await eventButton.click();
@@ -211,6 +214,10 @@ test.describe("authenticated production-critical smoke", () => {
       await page.getByRole("button", { name: "Tạo nhắc lịch" }).click();
       await page.goto("/reminders");
       await expect(page.getByRole("heading", { name: eventTitle }).first()).toBeVisible();
+      const deleteReminderButton = page.getByRole("button", { name: "Xóa nhắc lịch" });
+      await expect(deleteReminderButton).toHaveCount(1);
+      await deleteReminderButton.click();
+      await expect(deleteReminderButton).toHaveCount(0);
 
       await page.goto("/assignments");
       const taskCard = page.locator("article").filter({ hasText: taskTitle });

@@ -6,6 +6,7 @@ import vn.edu.school.schedule.weeklyplan.api.WeeklyPlanResponse;
 
 public record UserDashboardResponse(WeeklyPlanResponse currentWeek, List<RelevantItem> relevantToMe,
                                     PlanDayResponse today, WeeklyPlanResponse weeklyPlan,
-                                    NotificationSummary notificationSummary) {
+                                    NotificationSummary notificationSummary, TaskSummary taskSummary) {
     public record NotificationSummary(long unreadCount) { }
+    public record TaskSummary(long total, long completed, long incomplete, long overdue) { }
 }

@@ -305,7 +305,8 @@ class Phase4WeeklyPlanIT {
                 .andExpect(jsonPath("$.data.relevantToMe.length()").value(2))
                 .andExpect(jsonPath("$.data.relevantToMe[?(@.kind == 'SECTION')].matchedBy.length()").value(2))
                 .andExpect(jsonPath("$.data.relevantToMe[?(@.kind == 'HOMEROOM_CLASS')]").exists())
-                .andExpect(jsonPath("$.data.weeklyPlan.status").value("PUBLISHED"));
+                .andExpect(jsonPath("$.data.weeklyPlan.status").value("PUBLISHED"))
+                .andExpect(jsonPath("$.data.taskSummary.total").value(0));
         mvc.perform(get("/api/v1/dashboard/admin").cookie(user)).andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/dashboard/me").cookie(admin)).andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/dashboard/admin").cookie(admin)).andExpect(status().isOk())
@@ -325,6 +326,12 @@ class Phase4WeeklyPlanIT {
         mvc.perform(get("/api/v1/tasks/summary").cookie(admin)).andExpect(status().isOk()).andExpect(jsonPath("$.data.overdue").value(1));
         var userLogin=mvc.perform(login("teacher@example.edu.vn","Teacher@2026")).andExpect(status().isOk()).andReturn();
         Cookie user=userLogin.getResponse().getCookie("session");String userCsrf=userLogin.getResponse().getHeader("X-CSRF-Token");
+        mvc.perform(get("/api/v1/dashboard/me").cookie(user)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.weeklyPlan").doesNotExist())
+                .andExpect(jsonPath("$.data.today").doesNotExist())
+                .andExpect(jsonPath("$.data.taskSummary.total").value(1))
+                .andExpect(jsonPath("$.data.taskSummary.incomplete").value(1))
+                .andExpect(jsonPath("$.data.taskSummary.overdue").value(1));
         mvc.perform(get("/api/v1/tasks/me").cookie(user)).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(taskId));
         mvc.perform(patch("/api/v1/tasks/{id}/complete",taskId).cookie(user).contentType("application/json").content("{\"version\":0}"))
                 .andExpect(status().isForbidden());

@@ -8,7 +8,7 @@ export interface WeeklyPlanOptions { dutyClasses: ApiRef[]; departments: ApiRef[
 export interface PlanIssue { code: string; message: string }
 export interface PlanValidation { valid: boolean; errors: PlanIssue[]; warnings: PlanIssue[] }
 export interface RelevantItem { kind: "SECTION" | "TASK" | "HOMEROOM_CLASS"; entityId: string; title: string; content: string; matchedBy: string[]; deepLink: string }
-export interface UserDashboardData { currentWeek: WeeklyPlan; relevantToMe: RelevantItem[]; today: WeeklyPlan["days"][number] | null; weeklyPlan: WeeklyPlan; notificationSummary: { unreadCount: number } }
+export interface UserDashboardData { currentWeek: WeeklyPlan | null; relevantToMe: RelevantItem[]; today: WeeklyPlan["days"][number] | null; weeklyPlan: WeeklyPlan | null; notificationSummary: { unreadCount: number }; taskSummary: { total: number; completed: number; incomplete: number; overdue: number } }
 export interface AdminDashboardData { currentPlan: WeeklyPlan | null; needsAttention: { pendingUsers: number; openConversations: number; incompleteTasks: number; unpublishedPlans: number } }
 export interface DashboardService { me(weekId?: string): Promise<UserDashboardData>; admin(): Promise<AdminDashboardData> }
 export interface WeeklyPlanService {
@@ -129,7 +129,7 @@ export const weeklyPlanService: WeeklyPlanService = {
   async exportExcel(id) { return apiDownload(`/weekly-plans/${id}/export`); },
 };
 export const dashboardService: DashboardService = {
-  async me(weekId) { const raw = await apiRequest<Omit<UserDashboardData, "currentWeek" | "weeklyPlan"> & { currentWeek: ApiWeeklyPlan; weeklyPlan: ApiWeeklyPlan }>(`/dashboard/me${weekId ? `?weekId=${weekId}` : ""}`); return { ...raw, currentWeek: mapWeeklyPlan(raw.currentWeek), weeklyPlan: mapWeeklyPlan(raw.weeklyPlan) }; },
+  async me(weekId) { const raw = await apiRequest<Omit<UserDashboardData, "currentWeek" | "weeklyPlan"> & { currentWeek: ApiWeeklyPlan | null; weeklyPlan: ApiWeeklyPlan | null }>(`/dashboard/me${weekId ? `?weekId=${weekId}` : ""}`); return { ...raw, currentWeek: raw.currentWeek ? mapWeeklyPlan(raw.currentWeek) : null, weeklyPlan: raw.weeklyPlan ? mapWeeklyPlan(raw.weeklyPlan) : null }; },
   async admin() { const raw = await apiRequest<{ currentPlan: ApiWeeklyPlan | null; needsAttention: AdminDashboardData["needsAttention"] }>("/dashboard/admin"); return { ...raw, currentPlan: raw.currentPlan ? mapWeeklyPlan(raw.currentPlan) : null }; },
 };
 export const academicYearService: AcademicYearService = {

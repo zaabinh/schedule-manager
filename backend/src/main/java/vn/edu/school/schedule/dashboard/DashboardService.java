@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.school.schedule.dashboard.api.AdminDashboardResponse;
 import vn.edu.school.schedule.dashboard.api.RelevantItem;
 import vn.edu.school.schedule.dashboard.api.UserDashboardResponse;
+import vn.edu.school.schedule.shared.api.ApiException;
 import vn.edu.school.schedule.shared.security.AuthenticatedUser;
 import vn.edu.school.schedule.weeklyplan.WeeklyPlanService;
 import vn.edu.school.schedule.weeklyplan.api.PlanDayResponse;
@@ -24,7 +25,23 @@ public class DashboardService {
     public DashboardService(JdbcTemplate jdbc, WeeklyPlanService plans) { this.jdbc = jdbc; this.plans = plans; }
 
     public UserDashboardResponse user(UUID weekId, AuthenticatedUser actor) {
-        WeeklyPlanResponse plan = weekId == null ? plans.currentPublished() : plans.getByWeek(weekId, actor);
+        Long unread = jdbc.queryForObject("SELECT count(*) FROM notification_recipients WHERE user_id=? AND read_at IS NULL", Long.class, actor.id());
+        UserDashboardResponse.TaskSummary taskSummary = jdbc.queryForObject("""
+                SELECT count(*),
+                       count(*) FILTER (WHERE status='COMPLETED'),
+                       count(*) FILTER (WHERE status='TODO'),
+                       count(*) FILTER (WHERE status='TODO' AND due_at < now())
+                FROM tasks WHERE assignee_user_id=?
+                """, (rs, rowNum) -> new UserDashboardResponse.TaskSummary(
+                rs.getLong(1), rs.getLong(2), rs.getLong(3), rs.getLong(4)), actor.id());
+        WeeklyPlanResponse plan;
+        try {
+            plan = weekId == null ? plans.currentPublished() : plans.getByWeek(weekId, actor);
+        } catch (ApiException exception) {
+            if (weekId != null || !"PLAN_NOT_FOUND".equals(exception.code())) throw exception;
+            return new UserDashboardResponse(null, List.of(), null, null,
+                    new UserDashboardResponse.NotificationSummary(unread == null ? 0 : unread), taskSummary);
+        }
         Map<String, RelevantBuilder> relevant = new LinkedHashMap<>();
         jdbc.query("""
                 SELECT s.id,s.section_type,s.content,t.target_type
@@ -63,10 +80,9 @@ public class DashboardService {
                     "Lịch trực lớp chủ nhiệm trong tuần này.", "/weekly-plan", "HOMEROOM_CLASS"));
         }, plan.id(), actor.id());
         PlanDayResponse today = plan.days().stream().filter(day -> day.date().equals(LocalDate.now())).findFirst().orElse(null);
-        Long unread = jdbc.queryForObject("SELECT count(*) FROM notification_recipients WHERE user_id=? AND read_at IS NULL", Long.class, actor.id());
         List<RelevantItem> items = relevant.values().stream().map(RelevantBuilder::build).toList();
         return new UserDashboardResponse(plan, items, today, plan,
-                new UserDashboardResponse.NotificationSummary(unread == null ? 0 : unread));
+                new UserDashboardResponse.NotificationSummary(unread == null ? 0 : unread), taskSummary);
     }
 
     public AdminDashboardResponse admin() {

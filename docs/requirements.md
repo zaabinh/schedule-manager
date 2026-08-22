@@ -84,7 +84,7 @@ Mức ưu tiên: `MUST` bắt buộc trong MVP, `SHOULD` cần có nếu không 
 | FR-PLAN-007 | Chọn tối đa một lớp trực sáng và một lớp trực chiều. | ADMIN | MUST | Chỉ lớp active; cảnh báo nếu bỏ trống khi publish. |
 | FR-PLAN-008 | Validate trước publish với blocking errors và warnings. | ADMIN | MUST | Error chặn; warning yêu cầu xác nhận “publish with warnings”. |
 | FR-PLAN-009 | Publish chuyển trạng thái thành `PUBLISHED` và phát notification cho User. | ADMIN | MUST | `publishedAt/by` được lưu; User đọc được sau commit. |
-| FR-PLAN-010 | User chỉ xem `PUBLISHED`, gồm điều hướng tuần và chế độ plan/calendar. | USER | MUST | DRAFT luôn trả `404` cho USER để tránh lộ tồn tại. |
+| FR-PLAN-010 | User chỉ xem `PUBLISHED`, được chọn trong danh sách các tuần đã công bố và chuyển chế độ chi tiết/tổng quan. | USER | MUST | API danh sách không chứa DRAFT; truy cập trực tiếp DRAFT luôn trả `404` để tránh lộ tồn tại. |
 | FR-PLAN-011 | Admin sửa plan đã publish và chủ động chọn Website notification, Email, cả hai hoặc không. | ADMIN | MUST | Không tự gửi nếu cả hai false; thay đổi vẫn có AuditLog. |
 | FR-PLAN-012 | Dashboard User ưu tiên Current Week, Relevant To Me, Today, Weekly Plan, Notifications. | USER | MUST | Relevant khớp role, department, direct target/task và homeroom duty. |
 | FR-PLAN-013 | Dashboard Admin hiển thị hành động và mục cần chú ý. | ADMIN | MUST | Có trạng thái plan, pending users, open conversations, task chưa xong và next week unpublished. |

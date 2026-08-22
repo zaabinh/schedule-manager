@@ -73,6 +73,18 @@ public class WeeklyPlanService {
                 rs.getObject(6, LocalDate.class), rs.getObject(7, LocalDate.class), rs.getString(8)), academicYearId);
     }
 
+    public List<PlanWeekSummary> listPublishedWeeks() {
+        return jdbc.query("""
+                SELECT w.id,w.academic_year_id,w.sequence_number,w.display_number,w.week_type,
+                       w.start_date,w.end_date,p.status
+                FROM school_weeks w JOIN weekly_plans p ON p.school_week_id=w.id
+                WHERE p.status='PUBLISHED'
+                ORDER BY w.start_date DESC,w.sequence_number DESC
+                """, (rs, row) -> new PlanWeekSummary(rs.getObject(1, UUID.class), rs.getObject(2, UUID.class),
+                rs.getShort(3), displayLabel(rs.getString(5), rs.getShort(4)),
+                rs.getObject(6, LocalDate.class), rs.getObject(7, LocalDate.class), rs.getString(8)));
+    }
+
     public WeeklyPlanResponse getByWeek(UUID weekId, AuthenticatedUser actor) {
         WeeklyPlanResponse result = planByWeek(weekId);
         if (!"ADMIN".equals(actor.systemRole()) && !"PUBLISHED".equals(result.status()))

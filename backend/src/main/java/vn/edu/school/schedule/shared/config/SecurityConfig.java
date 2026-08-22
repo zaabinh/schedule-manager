@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/academic-years/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/weeks/*/plan").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/weekly-plans/current").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/weekly-plans/published").authenticated()
                         .requestMatchers("/api/v1/dashboard/admin").hasRole("ADMIN")
                         .requestMatchers("/api/v1/dashboard/me").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/tasks/*/attachments").authenticated()

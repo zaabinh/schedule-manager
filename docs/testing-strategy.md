@@ -153,7 +153,7 @@ UAT bởi Hiệu trưởng + đại diện giáo viên với dữ liệu giả l
 
 - Frontend lint, typecheck và production build PASS (23 routes).
 - Backend full gate PASS: 12 tests, 0 failure/error trên PostgreSQL 18 Testcontainers.
-- CF-05/CF-06: Event invalid/multi-day, validation errors/warnings, publish key/version/warning confirmation, retry idempotent, metadata, outbox/audit atomic, DRAFT 404, current published visibility và published notification-choice guard.
+- CF-05/CF-06: Event invalid/multi-day, validation errors/warnings, publish key/version/warning confirmation, retry idempotent, metadata, outbox/audit atomic, DRAFT 404, danh sách User chỉ chứa PUBLISHED, current published visibility và published notification-choice guard.
 
 ## 15. Phase 6 verification evidence (2026-08-19)
 

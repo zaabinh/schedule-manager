@@ -211,8 +211,8 @@ Các use case dùng thuật ngữ và rule từ [business-rules.md](business-rul
 - **Actor/Goal:** USER xem kế hoạch công bố và nội dung ưu tiên.
 - **Preconditions:** User active.
 - **Trigger:** mở dashboard/chọn tuần.
-- **Main flow:** xác định current week; chỉ query PUBLISHED; match BR-027; trả Relevant, Today, full plan và notifications.
-- **Alternative:** không có published plan hiển thị empty state; chuyển tuần trước/sau.
+- **Main flow:** tải danh sách tuần PUBLISHED; ưu tiên tuần hiện tại/gần nhất; User chọn hoặc tìm tuần, chuyển tuần trước/sau và xem dạng tổng quan gọn hoặc chi tiết; dashboard tiếp tục match BR-027 cho Relevant/Today.
+- **Alternative:** không có published plan hiển thị empty state; danh sách dài hỗ trợ tìm theo tên/ngày.
 - **Exception:** DRAFT/missing đều `404` ở endpoint plan.
 - **Postconditions:** read-only.
 - **Rules:** BR-015, BR-020, BR-027.

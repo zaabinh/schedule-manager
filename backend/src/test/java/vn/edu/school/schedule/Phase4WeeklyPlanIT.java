@@ -208,6 +208,13 @@ class Phase4WeeklyPlanIT {
                         .header("X-CSRF-Token", userCsrf))
                 .andExpect(status().isForbidden());
         jdbc.update("UPDATE weekly_plans SET status='PUBLISHED',published_at=now(),published_by=? WHERE id=?", ADMIN_ID, sourcePlan);
+        mvc.perform(get("/api/v1/weekly-plans/published"))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/v1/weekly-plans/published").cookie(userCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].id").value(SOURCE_WEEK.toString()))
+                .andExpect(jsonPath("$.data[0].planStatus").value("PUBLISHED"));
         mvc.perform(get("/api/v1/weeks/{id}/plan", SOURCE_WEEK).cookie(userCookie))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.status").value("PUBLISHED"));
 

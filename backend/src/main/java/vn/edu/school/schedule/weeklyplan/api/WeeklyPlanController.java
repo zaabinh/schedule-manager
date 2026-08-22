@@ -33,6 +33,11 @@ public class WeeklyPlanController {
         return ApiResponse.success(plans.listWeeks(academicYearId), correlationId());
     }
 
+    @GetMapping("/weekly-plans/published")
+    ApiResponse<List<PlanWeekSummary>> published() {
+        return ApiResponse.success(plans.listPublishedWeeks(), correlationId());
+    }
+
     @GetMapping("/weekly-plans/current")
     ApiResponse<WeeklyPlanResponse> current() {
         return ApiResponse.success(plans.currentPublished(), correlationId());

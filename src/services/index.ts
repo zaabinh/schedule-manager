@@ -12,7 +12,7 @@ export interface UserDashboardData { currentWeek: WeeklyPlan | null; relevantToM
 export interface AdminDashboardData { currentPlan: WeeklyPlan | null; needsAttention: { pendingUsers: number; openConversations: number; incompleteTasks: number; unpublishedPlans: number } }
 export interface DashboardService { me(weekId?: string): Promise<UserDashboardData>; admin(): Promise<AdminDashboardData> }
 export interface WeeklyPlanService {
-  getCurrent(): Promise<WeeklyPlan>; getByWeekId(weekId: string): Promise<WeeklyPlan>;
+  getCurrent(): Promise<WeeklyPlan>; getByWeekId(weekId: string): Promise<WeeklyPlan>; listPublished(): Promise<AcademicWeek[]>;
   create(weekId: string): Promise<WeeklyPlan>; copyPrevious(weekId: string, sourceWeekId: string, idempotencyKey: string): Promise<{ plan: WeeklyPlan; warnings: string[] }>;
   updateDraft(value: WeeklyPlan): Promise<WeeklyPlan>; listWeeks(academicYearId: string): Promise<AcademicWeek[]>;
   options(planId: string): Promise<WeeklyPlanOptions>; validate(id: string): Promise<PlanValidation>;
@@ -115,6 +115,7 @@ export const userService: UserService = {
 export const weeklyPlanService: WeeklyPlanService = {
   async getCurrent() { return mapWeeklyPlan(await apiRequest<ApiWeeklyPlan>("/weekly-plans/current")); },
   async getByWeekId(id) { return mapWeeklyPlan(await apiRequest<ApiWeeklyPlan>(`/weeks/${id}/plan`)); },
+  async listPublished() { return (await apiRequest<ApiPlanWeek[]>("/weekly-plans/published")).map((week) => ({ ...week, planStatus: "PUBLISHED" })); },
   async create(weekId) { return mapWeeklyPlan(await apiRequest<ApiWeeklyPlan>(`/weeks/${weekId}/plan`, { method: "POST" })); },
   async copyPrevious(weekId, sourceWeekId, idempotencyKey) { const result = await apiRequest<{ plan: ApiWeeklyPlan; warnings: string[] }>(`/weeks/${weekId}/plan/copy`, { method: "POST", headers: { "Idempotency-Key": idempotencyKey }, body: JSON.stringify({ sourceWeekId }) }); return { plan: mapWeeklyPlan(result.plan), warnings: result.warnings }; },
   async updateDraft(value) { return mapWeeklyPlan(await apiRequest<ApiWeeklyPlan>(`/weekly-plans/${value.id}`, { method: "PATCH", body: JSON.stringify(planWrite(value)) })); },

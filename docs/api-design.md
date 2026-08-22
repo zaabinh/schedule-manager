@@ -85,6 +85,7 @@ SchoolWeek response luôn chứa `id,academicYearId,sequenceNumber,displayNumber
 | Method/path | Actor | Request -> response | Validation | Errors/status |
 |---|---|---|---|---|
 | `GET /weekly-plans?academicYearId` | A | -> list week + plan status | year exists | `200/404` |
+| `GET /weekly-plans/published` | A/U | -> danh sách tuần đã xuất bản, mới nhất trước | authenticated; server predicate `PUBLISHED` | `200/401` |
 | `GET /weeks/{weekId}/plan` | A/U | -> WeeklyPlanDetail | U predicate PUBLISHED | `200`; PLAN_NOT_FOUND `404` |
 | `POST /weeks/{weekId}/plan` | A | `{}` -> WeeklyPlanDetail | one/Week | `201`; PLAN_EXISTS `409`, `404` |
 | `POST /weeks/{weekId}/plan/copy` | A | `{sourceWeekId}` -> `{plan,warnings}` | target empty/source exists; idempotency | `201`; `404/409/422` |
@@ -113,7 +114,7 @@ SchoolWeek response luôn chứa `id,academicYearId,sequenceNumber,displayNumber
 
 `ValidationResult = {valid, errors:[{code,path,message}], warnings:[...]}` với codes `WEEK_INVALID`, `PLAN_STRUCTURE_INVALID`, `DUTY_CLASS_MISSING`, `SECTION_EMPTY`, `DAY_EMPTY`, `EVENT_TIME_MISSING`.
 
-**Phase 5 implementation note:** management list/get/create/copy/options, DRAFT/full-save, Event CRUD, validation, publish và published-content đã được triển khai. Copy/publish yêu cầu header `Idempotency-Key`; published mutation bắt buộc lựa chọn website/email rõ ràng. `GET /weekly-plans/current` trả kế hoạch published hiện tại/gần nhất cho actor đã đăng nhập.
+**Phase 5 implementation note:** management list/get/create/copy/options, DRAFT/full-save, Event CRUD, validation, publish và published-content đã được triển khai. Copy/publish yêu cầu header `Idempotency-Key`; published mutation bắt buộc lựa chọn website/email rõ ràng. `GET /weekly-plans/current` trả kế hoạch published hiện tại/gần nhất; `GET /weekly-plans/published` chỉ trả danh mục tuần PUBLISHED để User tự chọn tuần cần xem.
 
 ### Event
 

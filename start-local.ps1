@@ -27,7 +27,25 @@ $env:SESSION_PEPPER = "local-development-pepper-change-me"
 
 $env:SCHOOL_TIME_ZONE = "Asia/Ho_Chi_Minh"
 
-$env:EMAIL_PROVIDER = "log"
+if ([string]::IsNullOrWhiteSpace($env:EMAIL_PROVIDER)) {
+    $env:EMAIL_PROVIDER = "log"
+}
+
+if ($env:EMAIL_PROVIDER -eq "smtp") {
+    $requiredSmtpVariables = @("EMAIL_FROM", "SMTP_HOST", "SMTP_PORT", "SMTP_USERNAME", "SMTP_PASSWORD")
+    $missingSmtpVariables = $requiredSmtpVariables | Where-Object {
+        [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_))
+    }
+    if ($missingSmtpVariables.Count -gt 0) {
+        throw "Missing SMTP environment variables: $($missingSmtpVariables -join ', ')"
+    }
+    if ([string]::IsNullOrWhiteSpace($env:SMTP_AUTH)) { $env:SMTP_AUTH = "true" }
+    if ([string]::IsNullOrWhiteSpace($env:SMTP_STARTTLS)) { $env:SMTP_STARTTLS = "true" }
+}
+
+# Tùy chọn: kiểm tra reminder nhanh hơn trong local
+$env:REMINDER_POLL_DELAY_MS = "5000"
+$env:REMINDER_INITIAL_DELAY_MS = "5000"
 
 $env:BOOTSTRAP_ADMIN_ENABLED = "false"
 $env:APP_PROVISIONING_MODE = "false"

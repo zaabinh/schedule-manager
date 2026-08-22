@@ -44,6 +44,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .field-with-leading-icon { padding-left: 2.75rem; }
 .field-with-both-icons { padding-right: 2.75rem; padding-left: 2.75rem; }
 .field::placeholder { color: #98a2b3; }
+.dialog-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: .625rem;
+  margin-top: 1.5rem !important;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.dialog-actions > button { width: 100%; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 13px; background: white; }
 .data-table { width: 100%; border-collapse: collapse; min-width: 720px; }
 .data-table th { padding: .75rem 1rem; text-align: left; background: #f9fafb; color: #667085; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
@@ -65,6 +74,11 @@ main .top-16 { top: 3.5rem; }
 
 @media (max-width: 768px) {
   .page-container { padding: .85rem; }
+}
+
+@media (min-width: 640px) {
+  .dialog-actions { flex-direction: row; justify-content: flex-end; }
+  .dialog-actions > button { width: auto; }
 }
 
 @page { size: A4 landscape; margin: 8mm; }

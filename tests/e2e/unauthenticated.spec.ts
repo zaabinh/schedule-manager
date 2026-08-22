@@ -15,6 +15,9 @@ test("khách truy cập dashboard được chuyển về đăng nhập", async (
 
 test("form đăng nhập dùng được bằng label và bàn phím", async ({ page }) => {
   await page.goto("/login");
+  await expect(page.getByRole("img", { name: "Logo Trường THPT số 2 Phan Bội Châu Gia Lai" }).first()).toBeVisible();
+  expect(await page.getByText("Trường THPT số 2 Phan Bội Châu Gia Lai", { exact: true }).count()).toBeGreaterThanOrEqual(2);
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute("href", /school-logo\.png/);
   const email = page.getByLabel("Email");
   const password = page.getByLabel("Mật khẩu", { exact: true });
   await email.fill("teacher@example.edu.vn");

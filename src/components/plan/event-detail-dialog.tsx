@@ -60,7 +60,7 @@ export function EventDetailDialog({ event, trigger }: { event: EventItem; trigge
         </fieldset>}
         {(!hasDateTime || preset === "CUSTOM") && <label><span className="field-label">Ngày giờ nhắc cụ thể</span><input className="field" type="datetime-local" required value={customTime} onChange={(value) => setCustomTime(value.target.value)}/></label>}
         {error && <p role="alert" className="text-sm font-medium text-red-700">{error}</p>}
-        <div className="flex justify-end gap-2"><Button variant="secondary" onClick={() => setReminderOpen(false)}>Hủy</Button><Button disabled={saving || (preset === "CUSTOM" && !customTime)} onClick={createReminder}>{saving ? "Đang tạo..." : "Tạo nhắc lịch"}</Button></div>
+        <div className="dialog-actions"><Button variant="secondary" onClick={() => setReminderOpen(false)}>Hủy</Button><Button disabled={saving || (preset === "CUSTOM" && !customTime)} onClick={createReminder}>{saving ? "Đang tạo..." : "Tạo nhắc lịch"}</Button></div>
       </div>
     </Dialog>
   </>;

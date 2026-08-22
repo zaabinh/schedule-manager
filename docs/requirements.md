@@ -161,7 +161,7 @@ Out of scope: mobile app, Google Calendar, WebSocket chat, personal calendar/con
 - **ASSUMPTION-01:** Một trường/tenant duy nhất; timezone cấu hình mặc định `Asia/Ho_Chi_Minh`.
 - **ASSUMPTION-02:** Xác thực dùng session opaque trong secure cookie, không dùng JWT trong MVP.
 - **ASSUMPTION-03:** `SchoolClass` thuộc một `AcademicYear`; tên lớp duy nhất trong năm học. Điều này làm rõ dữ liệu lớp thay đổi theo năm.
-- **ASSUMPTION-04:** Chỉ có một tài khoản `ADMIN` active theo mô tả “Hiệu trưởng là người duy nhất”; DB vẫn dùng enum để không khóa migration tương lai.
+- **DECISION-04 (2026-08-22):** Cho phép tối đa hai tài khoản `ADMIN` active. Database tự cấp một trong hai Admin slot duy nhất và từ chối Admin active thứ ba; email vẫn unique toàn hệ thống.
 - **ASSUMPTION-05:** Tuần mặc định bắt đầu từ ngày Admin nhập và các tuần ban đầu liên tiếp 7 ngày; sau khi sinh, từng tuần sửa độc lập.
 - **ASSUMPTION-06:** Notification “publish” gửi mọi User `ACTIVE`; email khi Admin chọn cũng gửi mọi User active.
 - **ASSUMPTION-07:** Reminder chung do Admin tạo được gửi tới tất cả User active; Event chưa có audience riêng.

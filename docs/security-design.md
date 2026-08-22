@@ -54,7 +54,7 @@ JPA parameter binding/Criteria; cấm nối raw query với sort/filter. Sort al
 
 ## 5. IDOR và approval security
 
-Mọi resource ID là UUID nhưng không coi UUID là authorization. Test matrix actor A/User owner/User khác/pending/inactive. Approval transaction validate Department/roles/class active, Admin duy nhất, audit old/new. Không cho self-elevate hoặc request truyền `systemRole`; bootstrap Admin qua secret one-time migration/runbook, sau đó tắt bootstrap.
+Mọi resource ID là UUID nhưng không coi UUID là authorization. Test matrix actor A/User owner/User khác/pending/inactive. Approval transaction validate Department/roles/class active, giới hạn tối đa hai Admin active, audit old/new. Không cho self-elevate hoặc request truyền `systemRole`; bootstrap Admin qua secret one-time migration/runbook, sau đó tắt bootstrap.
 
 Khi User bị inactive: revoke session, ngăn login, không xóa data; queued personal email có thể được worker skip nếu recipient không active (trừ email thông báo trạng thái theo policy).
 

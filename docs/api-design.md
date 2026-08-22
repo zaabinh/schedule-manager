@@ -41,7 +41,7 @@ Status: `200` read/update/action idempotent; `201` create; `204` delete/logout; 
 | `GET /users/{id}` | A | -> `UserDetail` | UUID | `200`; USER_NOT_FOUND `404` |
 | `PATCH /users/{id}/approval` | A | `{departmentId,businessRoleIds,homeroomClassId?,version}` -> UserDetail | refs active, BR-003/4/8 | `200`; `404`, USER_CONFIG_CONFLICT `409`, `422` |
 | `PATCH /users/{id}` | A | `{displayName,departmentId,businessRoleIds,homeroomClassId?,version}` -> UserDetail | same + name | `200`; `404/409/422` |
-| `PATCH /users/{id}/status` | A | `{status:"ACTIVE|INACTIVE",version}` -> UserDetail | transitions; one Admin | `200`; INVALID_STATE `409`, `422` |
+| `PATCH /users/{id}/status` | A | `{status:"ACTIVE|INACTIVE",version}` -> UserDetail | transitions; tối đa hai Admin active | `200`; INVALID_STATE `409`, `422` |
 
 `CurrentUser = {id,email,displayName,systemRole,status,department,businessRoles,homeroomClass}`. Không endpoint nào trả `passwordHash`.
 

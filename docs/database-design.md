@@ -59,7 +59,7 @@ erDiagram
 | version | bigint | NOT NULL default 0 | Optimistic lock |
 | created_at, updated_at | timestamptz | NOT NULL | Timestamps |
 
-Partial unique index `ux_one_active_admin ON users ((system_role)) WHERE system_role='ADMIN' AND status='ACTIVE'` thực thi ASSUMPTION-04.
+Migration V6 dùng hai `admin_slot` duy nhất (1 và 2), CHECK constraint và trigger cấp slot có advisory lock để cho phép tối đa hai `ADMIN` active, kể cả khi tạo đồng thời.
 
 ### `business_roles` và `user_roles`
 

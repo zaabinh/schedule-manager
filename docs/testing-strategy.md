@@ -51,7 +51,7 @@ Stack: JUnit 5, AssertJ, Mockito chỉ cho port; Spring Boot Test + MockMvc; Tes
 
 ## 4. Business-rule coverage
 
-- BR-001..009: authorization/approval/unique GVCN/soft deactivate repository+API tests.
+- BR-001..009: authorization/approval/tối đa hai Admin active/unique GVCN/soft deactivate repository+API tests.
 - BR-010..014: generator property tests for valid start dates and uniqueness.
 - BR-015..027: plan aggregate, copy, publish warning matrix, target combinations và Relevant dedup.
 - BR-028..036: fake Clock boundary exactly due time, DST-independent school timezone, retry lease recovery.
@@ -75,7 +75,7 @@ Inject `Clock`; không dùng `Thread.sleep`. Test exact before/at/after `remindA
 
 ### Database
 
-Chạy toàn bộ Flyway từ empty và upgrade từ bản release trước. Assert FK delete strategies, CHECKs, partial unique one Admin/GVCN, target polymorphic check, published metadata. Dùng `EXPLAIN` smoke cho notification feed, task overdue, plan load/Relevant query với dataset cỡ dự kiến.
+Chạy toàn bộ Flyway từ empty và upgrade từ bản release trước. Assert FK delete strategies, CHECKs, hai Admin slot duy nhất, partial unique GVCN, target polymorphic check, published metadata. Dùng `EXPLAIN` smoke cho notification feed, task overdue, plan load/Relevant query với dataset cỡ dự kiến.
 
 ### Frontend/E2E
 

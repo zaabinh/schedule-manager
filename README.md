@@ -139,6 +139,27 @@ Bootstrap chỉ dùng một lần. Sau khi Admin được tạo thành công, d�
 
 Mật khẩu đăng ký và bootstrap phải có ít nhất 8 ký tự, ít nhất một chữ thường, một chữ hoa và một ký tự đặc biệt không phải khoảng trắng; giới hạn tối đa là 72 byte UTF-8.
 
+#### Nạp dữ liệu demo local
+
+Sau khi Flyway đã tạo schema và đã có ít nhất một Admin đang hoạt động, chạy:
+
+```powershell
+docker compose cp scripts/seed-local-demo.sql postgres:/tmp/seed-local-demo.sql
+docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U schedule_app -d schedule_manager -f /tmp/seed-local-demo.sql
+```
+
+Script [scripts/seed-local-demo.sql](scripts/seed-local-demo.sql) tạo dữ liệu theo tuần hiện tại: 3 phòng ban, 5 giáo viên, 2 lớp, 2 kế hoạch tuần đã công bố, 3 sự kiện và 5 nhiệm vụ. Script có thể chạy lại mà không tạo bản ghi trùng.
+
+Các tài khoản giáo viên demo dùng chung mật khẩu `Demo@123`:
+
+- `nguyen.an@demo.edu.vn`
+- `le.mai@demo.edu.vn`
+- `pham.duc@demo.edu.vn`
+- `vu.lan@demo.edu.vn`
+- `dang.huy@demo.edu.vn`
+
+Chỉ dùng script này trên database local/demo. Mỗi lần chạy lại, mật khẩu và các nhiệm vụ demo được đưa về trạng thái mẫu.
+
 ### 4. Khởi động frontend
 
 Mở terminal khác tại thư mục gốc:

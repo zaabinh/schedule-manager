@@ -51,7 +51,7 @@ class Phase1OnboardingIT {
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
-        jdbc.update("DELETE FROM audit_logs");
+        jdbc.execute("TRUNCATE TABLE audit_logs");
         jdbc.update("DELETE FROM auth_sessions");
         jdbc.update("DELETE FROM user_roles");
         jdbc.update("DELETE FROM school_classes");
@@ -157,6 +157,46 @@ class Phase1OnboardingIT {
                         .content(registration))
                 .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("EMAIL_EXISTS"));
         mvc.perform(get("/api/v1/users")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void adminCanEditAnApprovedUserAndOptimisticLockingRejectsStaleChanges() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID yearId = UUID.randomUUID();
+        UUID classId = UUID.randomUUID();
+        jdbc.update("INSERT INTO academic_years(id,name,start_date,is_active,created_by) VALUES (?,?,?,true,?)",
+                yearId, "2032-2033", java.time.LocalDate.of(2032, 8, 16), ADMIN_ID);
+        jdbc.update("INSERT INTO school_classes(id,academic_year_id,name,normalized_name,grade) VALUES (?,?,?,?,?)",
+                classId, yearId, "11A1", "11a1", 11);
+        jdbc.update("""
+                INSERT INTO users(id,email,normalized_email,password_hash,display_name,system_role,status,department_id,approved_at)
+                VALUES (?,?,?,?,?,'USER','ACTIVE',?,now())
+                """, userId, "edit@example.edu.vn", "edit@example.edu.vn", passwords.encode("Valid@Pass"),
+                "Tên cũ", DEPARTMENT_ID);
+        jdbc.update("INSERT INTO user_roles(user_id,business_role_id) VALUES (?,?)", userId, LEADERSHIP_ROLE_ID);
+
+        var login = mvc.perform(login("admin@example.edu.vn", "correct horse battery staple"))
+                .andExpect(status().isOk()).andReturn();
+        Cookie cookie = login.getResponse().getCookie("session");
+        String csrf = login.getResponse().getHeader("X-CSRF-Token");
+        String update = "{\"displayName\":\"  Nguyễn   Văn An  \",\"departmentId\":\"" + DEPARTMENT_ID
+                + "\",\"businessRoleIds\":[\"" + LEADERSHIP_ROLE_ID + "\"],\"homeroomClassId\":\""
+                + classId + "\",\"version\":0}";
+
+        mvc.perform(patch("/api/v1/users/{id}", userId).cookie(cookie).header("X-CSRF-Token", csrf)
+                        .contentType("application/json").content(update))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.displayName").value("Nguyễn Văn An"))
+                .andExpect(jsonPath("$.data.homeroomClass.id").value(classId.toString()))
+                .andExpect(jsonPath("$.data.version").value(1));
+        assertThat(jdbc.queryForObject("SELECT homeroom_teacher_id FROM school_classes WHERE id=?", UUID.class, classId))
+                .isEqualTo(userId);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_logs WHERE entity_id=? AND action='USER_UPDATED'",
+                Integer.class, userId)).isEqualTo(1);
+
+        mvc.perform(patch("/api/v1/users/{id}", userId).cookie(cookie).header("X-CSRF-Token", csrf)
+                        .contentType("application/json").content(update))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("VERSION_CONFLICT"));
     }
 
     private org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder login(String email, String password) {

@@ -10,7 +10,8 @@ export type WeekType = "ORIENTATION" | "STUDY";
 
 export interface User {
   id: string; name: string; email: string; systemRole: SystemRole; status: AccountStatus;
-  department: string | null; businessRoles: string[]; homeroomClass: string | null; registeredAt?: string; version?: number;
+  departmentId?: string | null; department: string | null; businessRoleIds?: string[]; businessRoles: string[];
+  homeroomClassId?: string | null; homeroomClass: string | null; registeredAt?: string; version?: number;
 }
 export interface PlanTarget { type: TargetType; id?: string; label: string }
 export interface PlanSection { id: string; type: SectionType; title: string; content: string; targets: PlanTarget[]; relevant?: boolean }

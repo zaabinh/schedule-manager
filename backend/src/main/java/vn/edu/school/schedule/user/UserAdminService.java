@@ -20,6 +20,7 @@ import vn.edu.school.schedule.user.api.ApprovalOptions;
 import vn.edu.school.schedule.user.api.ApprovalRequest;
 import vn.edu.school.schedule.user.api.PageResponse;
 import vn.edu.school.schedule.user.api.StatusRequest;
+import vn.edu.school.schedule.user.api.UserUpdateRequest;
 
 @Service
 public class UserAdminService {
@@ -79,6 +80,43 @@ public class UserAdminService {
     }
 
     @Transactional
+    public CurrentUser update(UUID userId, UserUpdateRequest request, AuthenticatedUser actor) {
+        UserState before = state(userId);
+        if (!"USER".equals(before.systemRole()) || "PENDING".equals(before.status()))
+            throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATE",
+                    "Chỉ có thể chỉnh sửa tài khoản USER đã được duyệt.");
+        requireActive("departments", request.departmentId(), "DEPARTMENT_INACTIVE");
+        requireActiveRoles(request.businessRoleIds());
+        if (request.homeroomClassId() != null) requireAssignableClass(request.homeroomClassId(), userId);
+
+        int changed = jdbc.update("""
+                UPDATE users SET display_name=?,department_id=?,version=version+1,updated_at=now()
+                WHERE id=? AND version=? AND system_role='USER' AND status<>'PENDING'
+                """, cleanName(request.displayName()), request.departmentId(), userId, request.version());
+        if (changed == 0) throw conflict();
+
+        jdbc.update("DELETE FROM user_roles WHERE user_id=?", userId);
+        request.businessRoleIds().forEach(role -> jdbc.update(
+                "INSERT INTO user_roles(user_id,business_role_id) VALUES (?,?)", userId, role));
+        if (request.homeroomClassId() == null) {
+            jdbc.update("UPDATE school_classes SET homeroom_teacher_id=NULL,version=version+1,updated_at=now() "
+                    + "WHERE homeroom_teacher_id=?", userId);
+        } else {
+            jdbc.update("UPDATE school_classes SET homeroom_teacher_id=NULL,version=version+1,updated_at=now() "
+                    + "WHERE homeroom_teacher_id=? AND id<>?", userId, request.homeroomClassId());
+        }
+        if (request.homeroomClassId() != null) {
+            int assigned = jdbc.update("UPDATE school_classes SET homeroom_teacher_id=?,version=version+1,updated_at=now() "
+                    + "WHERE id=? AND is_active=true AND (homeroom_teacher_id IS NULL OR homeroom_teacher_id=?)",
+                    userId, request.homeroomClassId(), userId);
+            if (assigned == 0) throw new ApiException(HttpStatus.CONFLICT, "USER_CONFIG_CONFLICT",
+                    "Lớp đã có giáo viên chủ nhiệm.");
+        }
+        audit(actor.id(), userId, "USER_UPDATED", before.status(), before.status());
+        return auth.loadCurrentUser(userId);
+    }
+
+    @Transactional
     public CurrentUser setStatus(UUID userId, StatusRequest request, AuthenticatedUser actor) {
         UserState before = state(userId);
         if ("ADMIN".equals(before.systemRole()))
@@ -123,6 +161,19 @@ public class UserAdminService {
                 Integer.class, classId);
         if (count == null || count != 1)
             throw new ApiException(HttpStatus.CONFLICT, "USER_CONFIG_CONFLICT", "Lớp không khả dụng để phân công chủ nhiệm.");
+    }
+
+    private void requireAssignableClass(UUID classId, UUID userId) {
+        Integer count = jdbc.queryForObject("SELECT count(*) FROM school_classes WHERE id=? AND is_active=true "
+                        + "AND (homeroom_teacher_id IS NULL OR homeroom_teacher_id=?)",
+                Integer.class, classId, userId);
+        if (count == null || count != 1)
+            throw new ApiException(HttpStatus.CONFLICT, "USER_CONFIG_CONFLICT",
+                    "Lớp không khả dụng để phân công chủ nhiệm.");
+    }
+
+    private String cleanName(String value) {
+        return value.trim().replaceAll("\\s+", " ");
     }
 
     private void audit(UUID actor, UUID target, String action, String oldStatus, String newStatus) {

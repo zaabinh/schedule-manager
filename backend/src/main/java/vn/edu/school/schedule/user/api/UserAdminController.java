@@ -43,6 +43,12 @@ public class UserAdminController {
         return ApiResponse.success(users.approve(id, request, actor), correlationId());
     }
 
+    @PatchMapping("/{id}")
+    ApiResponse<CurrentUser> update(@PathVariable UUID id, @Valid @RequestBody UserUpdateRequest request,
+                                    @AuthenticationPrincipal AuthenticatedUser actor) {
+        return ApiResponse.success(users.update(id, request, actor), correlationId());
+    }
+
     @PatchMapping("/{id}/status")
     ApiResponse<CurrentUser> status(@PathVariable UUID id, @Valid @RequestBody StatusRequest request,
                                     @AuthenticationPrincipal AuthenticatedUser actor) {

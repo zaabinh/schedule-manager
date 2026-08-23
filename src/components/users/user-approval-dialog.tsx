@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, GraduationCap, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -12,45 +12,63 @@ import type { ApprovalOptions } from "@/services";
 import type { User } from "@/types/domain";
 
 const schema = z.object({
+  displayName: z.string().trim().min(1, "Vui lòng nhập họ và tên").max(150, "Họ và tên tối đa 150 ký tự"),
   departmentId: z.string().min(1, "Vui lòng chọn phòng ban"),
   businessRoleIds: z.array(z.string()).min(1, "Chọn ít nhất một vai trò"),
   homeroomClassId: z.string().optional(),
 });
 export type ApprovalValues = z.infer<typeof schema>;
 
-export function UserApprovalDialog({ user, options, open, onOpenChange, onApprove }: {
+export function UserApprovalDialog({ user, options, open, mode = "approve", onOpenChange, onSubmit }: {
   user?: User;
   options?: ApprovalOptions;
   open: boolean;
+  mode?: "approve" | "edit";
   onOpenChange: (value: boolean) => void;
-  onApprove: (value: ApprovalValues) => Promise<void>;
+  onSubmit: (value: ApprovalValues) => Promise<void>;
 }) {
   const [serverError, setServerError] = useState<string>();
   const { control, register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ApprovalValues>({
     resolver: zodResolver(schema),
-    defaultValues: { departmentId: "", businessRoleIds: [], homeroomClassId: "" },
+    defaultValues: { displayName: "", departmentId: "", businessRoleIds: [], homeroomClassId: "" },
   });
 
+  useEffect(() => {
+    if (!open || !user) return;
+    reset({ displayName: user.name, departmentId: user.departmentId ?? "",
+      businessRoleIds: user.businessRoleIds ?? [], homeroomClassId: user.homeroomClassId ?? "" });
+  }, [open, reset, user]);
+
   if (!user) return null;
+  const classOptions = [...(options?.classes ?? [])];
+  if (user.homeroomClassId && user.homeroomClass
+      && !classOptions.some((item) => item.id === user.homeroomClassId)) {
+    classOptions.push({ id: user.homeroomClassId, name: user.homeroomClass });
+  }
   function changeOpen(next: boolean) {
     if (!next) {
-      reset({ departmentId: "", businessRoleIds: [], homeroomClassId: "" });
+      reset({ displayName: "", departmentId: "", businessRoleIds: [], homeroomClassId: "" });
       setServerError(undefined);
     }
     onOpenChange(next);
   }
   async function submit(value: ApprovalValues) {
     setServerError(undefined);
-    try { await onApprove(value); changeOpen(false); }
-    catch (error) { setServerError(error instanceof Error ? error.message : "Không thể phê duyệt tài khoản."); }
+    try { await onSubmit(value); changeOpen(false); }
+    catch (error) { setServerError(error instanceof Error ? error.message : mode === "edit" ? "Không thể cập nhật người dùng." : "Không thể phê duyệt tài khoản."); }
   }
 
-  return <Dialog open={open} onOpenChange={changeOpen} title="Xem và phê duyệt tài khoản" description="Cấu hình thông tin nghiệp vụ trước khi kích hoạt tài khoản.">
+  return <Dialog open={open} onOpenChange={changeOpen} title={mode === "edit" ? "Chỉnh sửa người dùng" : "Xem và phê duyệt tài khoản"} description={mode === "edit" ? "Cập nhật họ tên, phòng ban, vai trò và lớp chủ nhiệm." : "Cấu hình thông tin nghiệp vụ trước khi kích hoạt tài khoản."}>
     <div className="mb-5 flex items-center gap-3 rounded-xl border border-emerald-900/10 bg-[var(--primary-soft)] p-4">
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white font-bold text-[var(--primary)] shadow-sm">{user.name.slice(0, 1).toUpperCase()}</span>
       <div className="min-w-0"><p className="truncate font-bold">{user.name}</p><p className="truncate text-sm text-slate-600">{user.email}</p></div>
     </div>
     <form className="space-y-5" onSubmit={handleSubmit(submit)}>
+      {mode === "edit" && <div>
+        <label className="field-label" htmlFor="user-display-name">Họ và tên *</label>
+        <input id="user-display-name" className="field" autoComplete="name" {...register("displayName")}/>
+        {errors.displayName && <span className="mt-1 block text-xs text-red-600">{errors.displayName.message}</span>}
+      </div>}
       <div>
         <span className="field-label flex items-center gap-2"><Building2 size={15}/>Phòng ban *</span>
         <Controller name="departmentId" control={control} render={({ field }) => <SearchableSelect
@@ -75,7 +93,7 @@ export function UserApprovalDialog({ user, options, open, onOpenChange, onApprov
           ariaLabel="Lớp chủ nhiệm"
           value={field.value ?? ""}
           onValueChange={field.onChange}
-          options={(options?.classes ?? []).map((item) => ({ value: item.id, label: item.name }))}
+          options={classOptions.map((item) => ({ value: item.id, label: item.name }))}
           placeholder="Chưa phân công"
           searchPlaceholder="Tìm lớp học…"
           clearable
@@ -83,7 +101,7 @@ export function UserApprovalDialog({ user, options, open, onOpenChange, onApprov
         />}/>
       </div>
       {serverError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{serverError}</p>}
-      <div className="dialog-actions"><Button type="button" variant="secondary" onClick={() => changeOpen(false)}>Hủy</Button><Button type="submit" disabled={isSubmitting || !options}>{isSubmitting ? "Đang phê duyệt…" : "Phê duyệt"}</Button></div>
+      <div className="dialog-actions"><Button type="button" variant="secondary" onClick={() => changeOpen(false)}>Hủy</Button><Button type="submit" disabled={isSubmitting || !options}>{isSubmitting ? (mode === "edit" ? "Đang lưu…" : "Đang phê duyệt…") : (mode === "edit" ? "Lưu thay đổi" : "Phê duyệt")}</Button></div>
     </form>
   </Dialog>;
 }

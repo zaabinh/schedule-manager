@@ -3,7 +3,8 @@ import { apiDownload, apiRequest, clearCsrfToken } from "@/services/http";
 
 export interface AuthService { getCurrentUser(): Promise<User>; register(input: { email: string; password: string; displayName: string }): Promise<{ id: string; status: string }>; login(email: string, password: string): Promise<User>; logout(): Promise<void> }
 export interface ApprovalOptions { departments: { id: string; name: string }[]; businessRoles: { id: string; name: string }[]; classes: { id: string; name: string }[] }
-export interface UserService { list(status?: User["status"]): Promise<User[]>; approvalOptions(): Promise<ApprovalOptions>; approve(id: string, input: { departmentId: string; businessRoleIds: string[]; homeroomClassId?: string; version: number }): Promise<User>; setStatus(id: string, status: "ACTIVE" | "INACTIVE", version: number): Promise<User> }
+export interface UserConfigWrite { displayName: string; departmentId: string; businessRoleIds: string[]; homeroomClassId?: string; version: number }
+export interface UserService { list(status?: User["status"]): Promise<User[]>; approvalOptions(): Promise<ApprovalOptions>; approve(id: string, input: Omit<UserConfigWrite, "displayName">): Promise<User>; update(id: string, input: UserConfigWrite): Promise<User>; setStatus(id: string, status: "ACTIVE" | "INACTIVE", version: number): Promise<User> }
 export interface WeeklyPlanOptions { dutyClasses: ApiRef[]; departments: ApiRef[]; businessRoles: ApiRef[]; users: ApiRef[] }
 export interface PlanIssue { code: string; message: string }
 export interface PlanValidation { valid: boolean; errors: PlanIssue[]; warnings: PlanIssue[] }
@@ -47,8 +48,10 @@ export interface AuditService { list(): Promise<AuditEntry[]> }
 type ApiRef = { id: string; name: string };
 type ApiUser = { id: string; email: string; displayName: string; systemRole: User["systemRole"]; status: User["status"]; department: ApiRef | null; businessRoles: ApiRef[]; homeroomClass: ApiRef | null; version: number };
 const mapUser = (value: ApiUser): User => ({ id: value.id, email: value.email, name: value.displayName,
-  systemRole: value.systemRole, status: value.status, department: value.department?.name ?? null,
-  businessRoles: value.businessRoles.map((role) => role.name), homeroomClass: value.homeroomClass?.name ?? null,
+  systemRole: value.systemRole, status: value.status, departmentId: value.department?.id ?? null,
+  department: value.department?.name ?? null, businessRoleIds: value.businessRoles.map((role) => role.id),
+  businessRoles: value.businessRoles.map((role) => role.name), homeroomClassId: value.homeroomClass?.id ?? null,
+  homeroomClass: value.homeroomClass?.name ?? null,
   version: value.version });
 type ApiDepartment = { id: string; name: string; description: string | null; isActive: boolean; version: number };
 type ApiBusinessRole = ApiDepartment & { isProtected: boolean };
@@ -110,6 +113,7 @@ export const userService: UserService = {
   async list(status) { const query = status ? `?status=${status}` : ""; const users = await apiRequest<ApiUser[]>(`/users${query}`); return users.map(mapUser); },
   async approvalOptions() { return apiRequest("/users/approval-options"); },
   async approve(id, input) { return mapUser(await apiRequest<ApiUser>(`/users/${id}/approval`, { method: "PATCH", body: JSON.stringify(input) })); },
+  async update(id, input) { return mapUser(await apiRequest<ApiUser>(`/users/${id}`, { method: "PATCH", body: JSON.stringify(input) })); },
   async setStatus(id, status, version) { return mapUser(await apiRequest<ApiUser>(`/users/${id}/status`, { method: "PATCH", body: JSON.stringify({ status, version }) })); },
 };
 export const weeklyPlanService: WeeklyPlanService = {

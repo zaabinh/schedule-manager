@@ -1,5 +1,6 @@
 package vn.edu.school.schedule.shared.config;
 
+import java.net.URI;
 import java.util.Arrays;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ public class ProductionConfigurationGuard implements SmartInitializingSingleton 
     private final boolean bootstrapAdmin;
     private final boolean provisioningMode;
     private final String emailProvider;
+    private final String emailWebUrl;
     private final String databasePassword;
 
     public ProductionConfigurationGuard(@Value("${app.security.cookie-secure}") boolean secureCookie,
@@ -25,6 +27,7 @@ public class ProductionConfigurationGuard implements SmartInitializingSingleton 
             @Value("${app.bootstrap-admin.enabled}") boolean bootstrapAdmin,
             @Value("${app.bootstrap-admin.provisioning-mode}") boolean provisioningMode,
             @Value("${app.email.provider}") String emailProvider,
+            @Value("${app.email.web-url}") String emailWebUrl,
             @Value("${spring.datasource.password}") String databasePassword) {
         this.secureCookie = secureCookie;
         this.cookieName = cookieName;
@@ -33,6 +36,7 @@ public class ProductionConfigurationGuard implements SmartInitializingSingleton 
         this.bootstrapAdmin = bootstrapAdmin;
         this.provisioningMode = provisioningMode;
         this.emailProvider = emailProvider;
+        this.emailWebUrl = emailWebUrl;
         this.databasePassword = databasePassword;
     }
 
@@ -49,6 +53,7 @@ public class ProductionConfigurationGuard implements SmartInitializingSingleton 
                 "BOOTSTRAP_ADMIN_ENABLED and APP_PROVISIONING_MODE must both be false for normal startup "
                         + "or both true for one-shot provisioning");
         require("smtp".equals(emailProvider), "EMAIL_PROVIDER must be smtp in prod");
+        require(isAbsoluteHttpsUrl(emailWebUrl), "EMAIL_WEB_URL must be an absolute HTTPS URL in prod");
         require(!"schedule_local_password".equals(databasePassword) && databasePassword.length() >= 16,
                 "DB_PASSWORD is unsafe");
     }
@@ -56,6 +61,17 @@ public class ProductionConfigurationGuard implements SmartInitializingSingleton 
     private static void require(boolean condition, String message) {
         if (!condition) {
             throw new IllegalStateException("Production configuration rejected: " + message);
+        }
+    }
+
+    private static boolean isAbsoluteHttpsUrl(String value) {
+        try {
+            URI uri = URI.create(value);
+            return "https".equalsIgnoreCase(uri.getScheme()) && uri.getHost() != null
+                    && uri.getRawQuery() == null && uri.getRawFragment() == null && uri.getUserInfo() == null
+                    && (uri.getPath() == null || uri.getPath().isEmpty() || "/".equals(uri.getPath()));
+        } catch (IllegalArgumentException ignored) {
+            return false;
         }
     }
 }

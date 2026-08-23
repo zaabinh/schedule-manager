@@ -26,8 +26,8 @@ services:
 
   backend-e2e:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     environment:
       DB_URL: jdbc:postgresql://postgres-e2e:5432/schedule_manager_e2e
       DB_USER: schedule_e2e
@@ -48,6 +48,7 @@ services:
       BOOTSTRAP_ADMIN_DEPARTMENT_NAME: Văn phòng E2E
       EMAIL_PROVIDER: smtp
       EMAIL_FROM: no-reply.e2e@example.edu.vn
+      EMAIL_WEB_URL: http://localhost:3100
       SMTP_HOST: mailpit-e2e
       SMTP_PORT: "1025"
       SMTP_AUTH: "false"

@@ -5,7 +5,7 @@ services:
     plan: starter
     region: singapore
     dockerfilePath: ./backend/Dockerfile
-    dockerContext: .
+    dockerContext: ./backend
     autoDeployTrigger: checksPass
     healthCheckPath: /actuator/health/readiness
     maxShutdownDelaySeconds: 60
@@ -63,6 +63,8 @@ services:
       - key: EMAIL_PROVIDER
         value: smtp
       - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_WEB_URL
         sync: false
       - key: SMTP_HOST
         sync: false

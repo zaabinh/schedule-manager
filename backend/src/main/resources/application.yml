@@ -79,6 +79,7 @@ app:
   email:
     provider: ${EMAIL_PROVIDER:log}
     from: ${EMAIL_FROM:no-reply@example.edu.vn}
+    web-url: ${EMAIL_WEB_URL:http://localhost:3000}
     max-attempts: ${EMAIL_MAX_ATTEMPTS:3}
 
   reminder:

@@ -84,7 +84,7 @@ Trả `429` + `Retry-After`. Provider email có domain/account quota, bounded re
 
 ## 7. Email security
 
-SPF, DKIM, DMARC cho domain gửi; TLS provider; template escape mọi nội dung; link dùng HTTPS canonical host và không chứa session/token ngoài reset token một lần. Không đưa Conversation/Task nhạy cảm đầy đủ vào subject; email log chỉ provider message ID/error code, không body. Unsubscribe không áp dụng cho email vận hành bắt buộc nhưng cần chính sách nhà trường.
+SPF, DKIM, DMARC cho domain gửi; TLS provider; template HTML escape mọi nội dung động và luôn kèm plain-text fallback; link lấy từ `EMAIL_WEB_URL`, production dùng HTTPS canonical host và không chứa session/token ngoài reset token một lần. Không đưa Conversation/Task nhạy cảm đầy đủ vào subject; email log chỉ metadata, không body. Unsubscribe không áp dụng cho email vận hành bắt buộc nhưng cần chính sách nhà trường.
 
 Reminder/Event thay đổi có thể làm remindAt lỗi thời: update Event phải hiển thị/đánh giá reminder liên quan; **OPEN QUESTION** xác định tự tính lại hay giữ absolute time. MVP giữ absolute `remindAt`, Admin/User phải xác nhận khi sửa Event time.
 

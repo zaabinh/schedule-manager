@@ -2,8 +2,8 @@ package vn.edu.school.schedule.notification;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,12 +18,13 @@ public class SmtpEmailSender implements EmailSender {
     }
 
     @Override
-    public void send(String recipient, String subject, String body) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
-        message.setTo(recipient);
-        message.setSubject(subject);
-        message.setText(body);
-        mailSender.send(message);
+    public void send(String recipient, EmailMessage message) {
+        mailSender.send(mimeMessage -> {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setFrom(from);
+            helper.setTo(recipient);
+            helper.setSubject(message.subject());
+            helper.setText(message.textBody(), message.htmlBody());
+        });
     }
 }

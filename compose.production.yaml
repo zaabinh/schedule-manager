@@ -18,8 +18,8 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: prod
@@ -40,6 +40,7 @@ services:
       SCHOOL_TIME_ZONE: ${SCHOOL_TIME_ZONE:-Asia/Ho_Chi_Minh}
       EMAIL_PROVIDER: smtp
       EMAIL_FROM: ${EMAIL_FROM:?required}
+      EMAIL_WEB_URL: ${PUBLIC_WEB_ORIGIN:?required}
       SMTP_HOST: ${SMTP_HOST:?required}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USERNAME: ${SMTP_USERNAME:?required}

@@ -9,20 +9,24 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 import vn.edu.school.schedule.notification.EmailSender;
+import vn.edu.school.schedule.notification.EmailTemplateRenderer;
 
 @Component
 public class ReminderWorker {
     private final JdbcTemplate jdbc;
     private final TransactionTemplate transactions;
     private final EmailSender email;
+    private final EmailTemplateRenderer templates;
     private final MeterRegistry metrics;
     private final int maxAttempts;
 
     public ReminderWorker(JdbcTemplate jdbc, TransactionTemplate transactions, EmailSender email,
-                          MeterRegistry metrics, @Value("${app.reminder.max-attempts:3}") int maxAttempts) {
+                          EmailTemplateRenderer templates, MeterRegistry metrics,
+                          @Value("${app.reminder.max-attempts:3}") int maxAttempts) {
         this.jdbc = jdbc;
         this.transactions = transactions;
         this.email = email;
+        this.templates = templates;
         this.metrics = metrics;
         this.maxAttempts = maxAttempts;
     }
@@ -67,7 +71,7 @@ public class ReminderWorker {
 
     private void deliver(Claim claim) {
         try {
-            email.send(claim.email(), "Nhắc lịch: " + claim.eventTitle(), "Sự kiện sắp diễn ra: " + claim.eventTitle());
+            email.send(claim.email(), templates.eventReminder(claim.eventTitle()));
             jdbc.update("""
                     UPDATE reminders SET status='SENT',sent_at=now(),attempt_count=attempt_count+1,
                     processing_lease_until=NULL,last_error_code=NULL,updated_at=now() WHERE id=?

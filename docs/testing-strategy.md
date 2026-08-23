@@ -193,7 +193,7 @@ UAT bởi Hiệu trưởng + đại diện giáo viên với dữ liệu giả l
 ## 21. Phase 12 repository hardening evidence (2026-08-19)
 
 - Frontend lint/typecheck/production build PASS (23 dynamic routes với nonce CSP), Playwright + axe 11 PASS/1 intentionally skipped: full business chain chạy một lần trên desktop, smoke auth/onboarding/accessibility chạy desktop/mobile; npm audit 0 vulnerability.
-- Authenticated baseline chạy trên production frontend image + backend/PostgreSQL/Mailpit thật: Admin/session/route guard, CF-01 onboarding và full chain plan/publish/Excel/SMTP notification+reminder/task/conversation PASS; Mailpit kiểm tra subject + recipient, axe không còn serious/critical tại các checkpoint.
+- Authenticated baseline chạy trên production frontend image + backend/PostgreSQL/Mailpit thật: Admin/session/route guard, CF-01 onboarding và full chain plan/publish/Excel/SMTP notification+reminder/task/conversation PASS; Mailpit kiểm tra subject, recipient và HTML template có nhận diện/CTA; axe không còn serious/critical tại các checkpoint.
 - k6 authenticated-read baseline re-run chạy 100 session/100 VU trong 30 giây: 20.457 request, p95 323,72 ms, 0% lỗi; CI giữ ngưỡng p95 `<500 ms`, lỗi `<1%`, checks `>99%`. Đây không thay thế staging dataset và API write gate.
 - OWASP ZAP passive baseline dùng image pin digest và policy-as-code: 0 FAIL, 0 WARN, 65 PASS; `X-Powered-By`, CSP unsafe-inline và COEP là regression FAIL. Active/authenticated scan vẫn chạy trên HTTPS staging.
 - Backend full clean `mvn verify` PASS: 21 tests, 0 failure/error; clean Flyway V1→V5 trên PostgreSQL 18.

@@ -241,6 +241,11 @@ backend/target/schedule-manager-backend-0.1.0-SNAPSHOT.jar
 | `SESSION_COOKIE_SECURE` | `false` | Phải là `true` trên HTTPS production |
 | `SESSION_PEPPER` | local fallback | Secret dùng hash session/CSRF; production phải thay |
 | `BOOTSTRAP_ADMIN_ENABLED` | `false` | Bật đúng một lần để tạo Admin đầu tiên |
+| `EMAIL_PROVIDER` | `log` | Dùng `smtp` để gửi email MIME HTML; `log` chỉ mô phỏng gửi trong log |
+| `EMAIL_FROM` | `no-reply@example.edu.vn` | Địa chỉ người gửi hiển thị trong email |
+| `EMAIL_WEB_URL` | `http://localhost:3000` | Origin tuyệt đối dùng cho các nút hành động trong email |
+| `SMTP_HOST`, `SMTP_PORT` | `localhost`, `1025` | Máy chủ và cổng SMTP |
+| `SMTP_AUTH`, `SMTP_STARTTLS` | `false`, `false` | Bật theo yêu cầu của SMTP provider |
 | `TASK_ATTACHMENT_MAX_FILES` | `10` | Số tệp active tối đa trên một Task |
 | `TASK_ATTACHMENT_MAX_FILE_SIZE_BYTES` | `20971520` | Dung lượng tối đa một tệp (20 MiB) |
 | `TASK_ATTACHMENT_MAX_TOTAL_SIZE_BYTES` | `104857600` | Tổng dung lượng tối đa một Task (100 MiB) |

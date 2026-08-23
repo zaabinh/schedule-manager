@@ -2,7 +2,7 @@ import { expect, request, test, type APIRequestContext, type APIResponse } from 
 import AxeBuilder from "@axe-core/playwright";
 
 type ApiEnvelope<T> = { data: T };
-type MailpitMessage = { Subject: string; To: Array<{ Address: string }> };
+type MailpitMessage = { ID: string; Subject: string; To: Array<{ Address: string }> };
 
 async function apiData<T>(response: APIResponse): Promise<T> {
   if (!response.ok()) throw new Error(`${response.url()} returned ${response.status()}: ${await response.text()}`);
@@ -17,12 +17,18 @@ async function loginApi(context: APIRequestContext, email: string, password: str
   return csrf;
 }
 
-async function hasMail(context: APIRequestContext, recipient: string, subject: string) {
+async function hasMail(context: APIRequestContext, recipient: string, subject: string, htmlNeedle?: string) {
   const response = await context.get("messages");
   if (!response.ok()) throw new Error(`Mailpit messages returned ${response.status()}: ${await response.text()}`);
   const payload = await response.json() as { messages: MailpitMessage[] };
-  return payload.messages.some(message => message.Subject.includes(subject)
-    && message.To.some(address => address.Address.toLowerCase() === recipient.toLowerCase()));
+  const message = payload.messages.find(item => item.Subject.includes(subject)
+    && item.To.some(address => address.Address.toLowerCase() === recipient.toLowerCase()));
+  if (!message) return false;
+  if (!htmlNeedle) return true;
+  const detailResponse = await context.get(`message/${message.ID}`);
+  if (!detailResponse.ok()) return false;
+  const detail = await detailResponse.json() as { HTML?: string };
+  return detail.HTML?.includes(htmlNeedle) === true;
 }
 
 test.describe("authenticated production-critical smoke", () => {
@@ -233,10 +239,10 @@ test.describe("authenticated production-critical smoke", () => {
       await dialog.getByRole("button", { name: "Gửi trao đổi" }).click();
       await expect(page.getByText(conversationSubject, { exact: true }).first()).toBeVisible();
 
-      await expect.poll(() => hasMail(mailpit, teacherEmail, "Kế hoạch tuần đã cập nhật"), {
+      await expect.poll(() => hasMail(mailpit, teacherEmail, "Kế hoạch tuần đã cập nhật", "/school-logo.png"), {
         message: "Expected the published-plan update email in Mailpit.", timeout: 15_000,
       }).toBe(true);
-      await expect.poll(() => hasMail(mailpit, teacherEmail, `Nhắc lịch: ${eventTitle}`), {
+      await expect.poll(() => hasMail(mailpit, teacherEmail, `Nhắc lịch: ${eventTitle}`, "Xem kế hoạch tuần"), {
         message: "Expected the due reminder email in Mailpit.", timeout: 15_000,
       }).toBe(true);
 

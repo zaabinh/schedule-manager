@@ -11,13 +11,13 @@ public class LoggingEmailSender implements EmailSender {
     private static final Logger log = LoggerFactory.getLogger(LoggingEmailSender.class);
 
     @Override
-    public void send(String recipient, String subject, String body) {
+    public void send(String recipient, EmailMessage message) {
         int separator = recipient.indexOf('@');
         String domain = separator >= 0 ? recipient.substring(separator + 1) : "invalid";
         log.info(
                 "Email delivery simulated recipientDomain={} subjectLength={} bodyLength={}",
                 domain,
-                subject.length(),
-                body.length());
+                message.subject().length(),
+                message.htmlBody().length());
     }
 }
